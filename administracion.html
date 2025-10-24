@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Castillo y Asociados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/common.js"></script>
+</head>
+
+<body class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <img src="images/CASTILLO.png" alt="Castillo & Asociados" class="sidebar-logo">
+            <h2>Panel Admin</h2>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item active" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </li>
+            <li class="nav-item" data-tab="prospectos">
+                <i class="fas fa-users"></i>
+                <span>Prospectos</span>
+            </li>
+            <li class="nav-item" data-tab="clientes">
+                <i class="fas fa-user-check"></i>
+                <span>Clientes</span>
+            </li>
+            <!-- Agregar clases para control por rol -->
+            <li class="nav-item admin-only superadmin-only" data-tab="agentes">
+                <i class="fas fa-user-tie"></i>
+                <span>Agentes</span>
+            </li>
+            <li class="nav-item" data-tab="reservas">
+                <i class="fas fa-calendar-check"></i>
+                <span>Reservas</span>
+            </li>
+            <li class="nav-item" data-tab="contratos">
+                <i class="fas fa-file-contract"></i>
+                <span>Contratos</span>
+            </li>
+            <li class="nav-item" data-tab="prorrogas">
+                <i class="fas fa-clock"></i>
+                <span>Prórrogas</span>
+            </li>
+            <!-- Agregar clases para control por rol -->
+            <li class="nav-item admin-only superadmin-only" data-tab="equipos">
+                <i class="fas fa-users-cog"></i>
+                <span>Equipos</span>
+            </li>
+            <li class="nav-item" data-tab="ranking">
+                <i class="fas fa-trophy"></i>
+                <span>Ranking</span>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-menu">
+                    <span id="userName">Administrador</span>
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="dropdown-menu">
+                        <!-- <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Configuración
+                        </a> -->
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Alert Container -->
+            <div class="alert-container" id="alertContainer"></div>
+
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboardTab">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalProspectos">0</h3>
+                            <p>Total Prospectos</p>
+                            <div class="stat-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12% vs mes anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalClientes">0</h3>
+                            <p>Total Clientes</p>
+                            <div class="stat-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8% vs mes anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalReservas">0</h3>
+                            <p>Reservas Activas</p>
+                            <div class="stat-trend trend-down">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>3% vs mes anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalContratos">0</h3>
+                            <p>Contratos Firmados</p>
+                            <div class="stat-trend trend-up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>15% vs mes anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Charts Section - 3 GRÁFICOS EN 1 FILA -->
+                <div class="charts-main-section">
+                    <div class="chart-card large">
+                        <div class="chart-header">
+                            <h3>Progreso Mensual</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Estado Prospectos</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="prospectosChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Reservas por Estado</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="reservasChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Section -->
+                <div class="performance-section">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2>Rendimiento de Agentes</h2>
+                            <button class="btn btn-outline" onclick="app.showModule('ranking')">
+                                Ver Ranking Completo
+                            </button>
+                        </div>
+                        <div class="performance-grid" id="agentPerformance">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Actividad Reciente</h2>
+                    </div>
+                    <div class="activity-list" id="recentActivity">
+                        <!-- Las actividades se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prospectos Tab -->
+            <div class="tab-content" id="prospectosTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Prospectos</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="prospectosSearch" placeholder="Buscar prospecto...">
+                            </div>
+
+                            <!-- Botón Volcar Lista -->
+                            <button class="btn btn-outline" id="btnVoltearProspectos" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosProspectos" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportProspectos" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+
+                            <button class="btn btn-success" id="btnCrearProspecto" title="Crear Prospecto">
+                                <i class="fas fa-plus"></i>
+                                <span class="btn-text">Nuevo Prospecto</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="prospectosTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Celular</th>
+                                    <th class="col-hide-mobile">Asesor</th>
+                                    <th class="col-hide-mobile">Registro</th>
+                                    <th>Estado</th>
+                                    <th class="col-hide-mobile">Seguimiento</th>
+                                    <th class="actions-column">
+                                        <span>Más</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="prospectosTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="prospectosPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPage" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbers">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPage" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clientes Tab -->
+            <div class="tab-content" id="clientesTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Clientes</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="clientesSearch" placeholder="Buscar cliente...">
+                            </div>
+
+                            <!-- Botón Volcar Lista -->
+                            <button class="btn btn-outline" id="btnVoltearClientes" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosClientes" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportClientes" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Clientes -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="clientesTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Firmas</th>
+                                    <th class="actions-column">
+                                        <span>Más</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientesTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="clientesPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageClientes" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersClientes">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageClientes" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agentes Tab -->
+            <div class="tab-content" id="agentesTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Agentes</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="agentesSearch" placeholder="Buscar agente...">
+                            </div>
+
+                            <!-- Botón Voltear lista -->
+                            <button class="btn btn-outline" id="btnVoltearAgentes" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosAgentes" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportAgentes" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Agentes -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="agentesTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Prospectos</th>
+                                    <th>Firmas</th>
+                                    <th class="col-hide-mobile">Equipo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agentesTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="agentesPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageAgentes" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersAgentes">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageAgentes" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contratos Tab -->
+            <div class="tab-content" id="contratosTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Contratos</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="contratosSearch" placeholder="Buscar por cliente, lote o manzano...">
+                            </div>
+
+                            <!-- Botón Voltear Lista -->
+                            <button class="btn btn-outline" id="btnVoltearContratos" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosContratos" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportContratos" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Contratos -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="contratosTable">
+                            <thead>
+                                <tr>
+                                    <th>Proyecto</th>
+                                    <th class="col-hide-mobile">Lote</th>
+                                    <th>Cliente</th>
+                                    <th class="col-hide-mobile">Asesor</th>
+                                    <th class="col-hide-mobile">Equipo</th>
+                                    <th class="col-hide-mobile">Método Pago</th>
+                                    <th>Monto</th>
+                                    <th class="col-hide-mobile">Fecha Firma</th>
+                                    <th style="display: none;" class="col-hide-mobile">Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contratosTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="contratosPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageContratos" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersContratos">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageContratos" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipos Tab -->
+            <div class="tab-content" id="equiposTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Equipos</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="equiposSearch" placeholder="Buscar equipo o agente...">
+                            </div>
+
+                            <!-- Botón Voltear Lista -->
+                            <button class="btn btn-outline" id="btnVoltearEquipos" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportEquipos" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+
+                            <button class="btn btn-success" id="btnCrearEquipo" title="Crear Equipo">
+                                <i class="fas fa-plus"></i>
+                                <span class="btn-text">Nuevo Equipo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Equipos -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="equiposTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th class="col-hide-mobile">Miembros</th>
+                                    <th class="actions-column">
+                                        <span>Más</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="equiposTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="equiposPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageEquipos" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersEquipos">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageEquipos" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prórrogas Tab -->
+            <div class="tab-content" id="prorrogasTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Prórrogas</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="prorrogasSearch" placeholder="Buscar por cliente o asesor...">
+                            </div>
+
+                            <!-- Botón Voltear Lista -->
+                            <button class="btn btn-outline" id="btnVoltearProrrogas" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosProrrogas" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportProrrogas" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Prórrogas -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="prorrogasTable">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th class="col-hide-mobile">Asesor</th>
+                                    <th class="col-hide-mobile">Fecha Solicitud</th>
+                                    <th class="col-hide-mobile">Fecha Límite</th>
+                                    <th>Estado</th>
+                                    <th class="actions-column">
+                                        <span>Acciones</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="prorrogasTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="prorrogasPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageProrrogas" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersProrrogas">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageProrrogas" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Tab -->
+            <div class="tab-content" id="rankingTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Dashboard de Rendimiento</h2>
+                        <div class="header-actions">
+                            <div class="search-box" style="visibility: hidden;">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="rankingSearch" placeholder="Buscar prospecto...">
+                            </div>
+                            <!-- SOLO el botón de filtros aquí -->
+                            <button class="btn btn-outline" id="btnFiltrosRanking" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+
+                            <button class="btn btn-primary" id="exportRanking" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid de Contenido -->
+                    <div class="ranking-grid-profesional">
+                        <!-- Gráfico de Rendimiento -->
+                        <div class="ranking-card chart-card">
+                            <div class="card-header">
+                                <h3>Rendimiento por Puntos</h3>
+                                <span class="card-subtitle">Top 8 participantes</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="rankingPerformanceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Gráfico de Distribución -->
+                        <div class="ranking-card chart-card">
+                            <div class="card-header">
+                                <h3>Distribución de Puntos</h3>
+                                <span class="card-subtitle">Top 5 vs Resto</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="rankingDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reservas Tab -->
+            <div class="tab-content" id="reservasTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Reservas</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="reservasSearch" placeholder="Buscar reserva...">
+                            </div>
+
+                            <!-- Botón Voltear Lista -->
+                            <button class="btn btn-outline" id="btnVoltearReservas" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosReservas" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+                            
+                            <button class="btn btn-primary" id="exportReservas" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Reservas -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="reservasTable">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Proyecto</th>
+                                    <th class="col-hide-mobile">Lote</th>
+                                    <th class="col-hide-mobile">Plazo</th>
+                                    <th class="col-hide-mobile">Asesor</th>
+                                    <th class="col-hide-mobile">Método Pago</th>
+                                    <th class="col-hide-mobile">Monto Reserva</th>
+                                    <th>Estado</th>
+                                    <th class="actions-column">
+                                        <span>Más</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="reservasTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación Mejorada -->
+                    <div class="pagination" id="reservasPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageReservas" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersReservas">
+                                    <!-- Los números de página se generan dinámicamente -->
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageReservas" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- Modal Cambiar Seguimiento -->
+    <div class="modal" id="modalSeguimiento">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>Cambiar Seguimiento</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="seguimientoProspectoId" />
+                
+                <div class="form-group">
+                    <label for="selectSeguimiento">Estado de Seguimiento *</label>
+                    <select id="selectSeguimiento" class="form-control" required>
+                        <option value="">Seleccionar estado...</option>
+                        <option value="Caliente">Caliente</option>
+                        <option value="Tibio">Tibio</option>
+                        <option value="Frio">Frío</option>
+                    </select>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>El estado de seguimiento ayuda a priorizar los prospectos.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalSeguimiento')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnGuardarSeguimiento">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar Prospecto -->
+    <div class="modal" id="modalProspecto">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3 id="modalProspectoTitulo">Crear Prospecto</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formProspecto">
+                    <input type="hidden" id="prospectoId" />
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prospectoNombre">Nombre *</label>
+                            <input type="text" id="prospectoNombre" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prospectoApellido">Apellido *</label>
+                            <input type="text" id="prospectoApellido" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="prospectoCelular">Celular *</label>
+                        <input type="tel" id="prospectoCelular" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalProspecto')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnGuardarProspecto">
+                    <i class="fas fa-save"></i> Guardar Prospecto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prórroga -->
+    <div class="modal" id="modalProrroga">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Registrar Prórroga</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="prorrogaProspectoId" />
+                <input type="hidden" id="prorrogaFecha" />
+                
+                <div class="form-group">
+                    <label for="prorrogaMotivo">Motivo de la prórroga *</label>
+                    <textarea id="prorrogaMotivo" class="form-control" rows="3" placeholder="Describe el motivo de la prórroga..." required></textarea>
+                </div>
+
+                <!-- NUEVO CAMPO PARA IMAGEN URL -->
+                <div class="form-group">
+                    <label for="prorrogaImagenUrl">URL de Imagen (Opcional)</label>
+                    <input type="url" id="prorrogaImagenUrl" class="form-control" 
+                        placeholder="https://ejemplo.com/imagen.jpg">
+                    <small class="form-text text-muted">
+                        Puede subir la imagen a un servicio como ImgBB, Google Drive, etc. y pegar el enlace aquí
+                    </small>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>La prórroga extenderá la fecha límite del prospecto. Incluya una imagen si es necesario.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalProrroga')">
+                    Cancelar
+                </button>
+                <button class="btn btn-warning" id="btnGuardarProrroga">
+                    <i class="fas fa-clock"></i> Aplicar Prórroga
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registrar (Convertir a Cliente) -->
+    <div class="modal" id="modalRegistrar">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Registrar como Cliente</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="registrarProspectoId" />
+                
+                <div class="form-group">
+                    <label for="registrarProyecto">Proyecto *</label>
+                    <select id="registrarProyecto" class="form-control" required>
+                        <option value="">Seleccionar proyecto...</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registrarLote">Lote *</label>
+                        <input type="number" id="registrarLote" class="form-control" required min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="registrarManzano">Manzano *</label>
+                        <input type="text" id="registrarManzano" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registrarFechaFirma">Fecha de Firma *</label>
+                    <input type="date" id="registrarFechaFirma" class="form-control" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registrarMetodoPago">Método de Pago *</label>
+                        <select id="registrarMetodoPago" class="form-control" required>
+                            <option value="">Seleccionar método</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Depósito">Depósito</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="registrarMonto">Monto (Bs) *</label>
+                        <input type="number" id="registrarMonto" class="form-control" step="0.01" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="info-box success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Al registrar, el prospecto será convertido en cliente y movido a la sección correspondiente.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalRegistrar')">
+                    Cancelar
+                </button>
+                <button class="btn btn-success" id="btnGuardarRegistro">
+                    <i class="fas fa-user-check"></i> Registrar como Cliente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Prospectos -->
+    <div class="modal" id="modalFiltrosProspectos">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Prospectos</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicio">Desde</label>
+                                <input type="date" id="fechaInicio" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFin">Hasta</label>
+                                <input type="date" id="fechaFin" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Estado -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="filtroEstado">Estado</label>
+                        <select id="filtroEstado" class="form-control">
+                            <option value="todos">Todos los estados</option>
+                            <option value="nuevo">Nuevo (0-10 días)</option>
+                            <option value="reciente">Reciente (11-25 días)</option>
+                            <option value="antiguo">Antiguo (26-30 días)</option>
+                            <option value="expirado">Expirado (+30 días)</option>
+                        </select>
+                    </div>
+
+                    <!-- NUEVO FILTRO: Seguimiento -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="filtroSeguimiento">Seguimiento</label>
+                        <select id="filtroSeguimiento" class="form-control">
+                            <option value="todos">Todos los seguimientos</option>
+                            <option value="Caliente">Caliente</option>
+                            <option value="Tibio">Tibio</option>
+                            <option value="Frio">Frío</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Asesor -->
+                    <div class="filter-group" id="prospectofiltroAgenteGroup" style="display: none;">
+                        <label class="filter-label" for="filtroAsesor">Asesor</label>
+                        <select id="filtroAsesor" class="form-control">
+                            <option value="todos">Todos los asesores</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainer" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicados">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltros">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosProspectos')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltros">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Firmas -->
+    <div class="modal" id="modalFirmasCliente">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="modalFirmasTitulo">Firmas del Cliente</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="data-table" id="firmasTable">
+                        <thead>
+                            <tr>
+                                <th>Proyecto</th>
+                                <th>Manzano</th>
+                                <th>Lote</th>
+                                <th class="actions-column">Accion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="firmasTableBody">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFirmasCliente')">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Clientes -->
+    <div class="modal" id="modalFiltrosClientes">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Clientes</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas de Firma</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioClientes">Desde</label>
+                                <input type="date" id="fechaInicioClientes" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinClientes">Hasta</label>
+                                <input type="date" id="fechaFinClientes" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroProyectoClientes">Proyecto</label>
+                                <select id="filtroProyectoClientes" class="form-control">
+                                    <option value="todos">Todos los proyectos</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="clientefiltroAgenteGroup" style="display: none;">
+                                <label class="filter-label" for="filtroAgenteClientes">Agente</label>
+                                <select id="filtroAgenteClientes" class="form-control">
+                                    <option value="todos">Todos los agentes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroEquipoClientes">Equipo</label>
+                                <select id="filtroEquipoClientes" class="form-control">
+                                    <option value="todos">Todos los equipos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroAmuralladoClientes">Estado Amurallado</label>
+                                <select id="filtroAmuralladoClientes" class="form-control">
+                                    <option value="todos">Todos</option>
+                                    <option value="amurallado">Amurallados</option>
+                                    <option value="no-amurallado">No Amurallados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerClientes" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosClientes">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosClientes">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosClientes')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosClientes">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Amurallar Contrato -->
+    <div class="modal" id="modalAmurallarContrato">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Amurallar Contrato</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="amurallarContratoId" />
+                
+                <div class="form-group">
+                    <label for="amurallarMetodoPago">Método de Pago *</label>
+                    <select id="amurallarMetodoPago" class="form-control" required>
+                        <option value="">Seleccionar método...</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Depósito">Depósito</option>
+                        <option value="Qr">Qr</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amurallarMonto">Monto (Bs) *</label>
+                    <input type="number" id="amurallarMonto" class="form-control" 
+                        step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Al amurallar el contrato, se registrará el pago correspondiente.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalAmurallarContrato')">
+                    Cancelar
+                </button>
+                <button class="btn btn-warning" id="btnConfirmarAmurallar">
+                    <i class="fas fa-wall"></i> Amurallar Contrato
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Acciones (para todas las tablas) -->
+
+    <div class="modal actions-modal" id="actionsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="actionsModalTitle">Acciones</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="actionsModalBody">
+                <!-- Las acciones se cargarán dinámicamente según el contexto -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Agente -->
+    <div class="modal" id="modalCambiarAgente">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reasignar Agente</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="prospectoIdCambio" />
+                <div class="form-group">
+                    <label for="selectNuevoAgente">Selecciona un nuevo agente</label>
+                    <select id="selectNuevoAgente" class="form-control"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalCambiarAgente')">Cancelar</button>
+                <button class="btn btn-primary" id="btnGuardarCambioAgente">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Agentes -->
+    <div class="modal" id="modalFiltrosAgentes">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Agentes</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Equipo -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="filtroEquipoAgentes">Equipo</label>
+                        <select id="filtroEquipoAgentes" class="form-control">
+                            <option value="todos">Todos los equipos</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerAgentes" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosAgentes">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosAgentes">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosAgentes')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosAgentes">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Contratos -->
+    <div class="modal" id="modalFiltrosContratos">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Contratos</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas de Firma</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioContratos">Desde</label>
+                                <input type="date" id="fechaInicioContratos" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinContratos">Hasta</label>
+                                <input type="date" id="fechaFinContratos" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Equipo y Asesor -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroEquipoContratos">Equipo</label>
+                                <select id="filtroEquipoContratos" class="form-control">
+                                    <option value="todos">Todos los equipos</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="contratofiltroAgenteGroup" style="display: none;">
+                                <label class="filter-label" for="filtroAsesorContratos">Asesor</label>
+                                <select id="filtroAsesorContratos" class="form-control">
+                                    <option value="todos">Todos los asesores</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Proyecto y Tipo -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroProyectoContratos">Proyecto</label>
+                                <select id="filtroProyectoContratos" class="form-control">
+                                    <option value="todos">Todos los proyectos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroTipoContratos">Tipo</label>
+                                <select id="filtroTipoContratos" class="form-control">
+                                    <option value="todos">Todos los tipos</option>
+                                    <option value="Muralla">Muralla</option>
+                                    <option value="Terreno">Terreno</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Método de Pago y Amurallado -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroMetodoPagoContratos">Método de Pago</label>
+                                <select id="filtroMetodoPagoContratos" class="form-control">
+                                    <option value="todos">Todos los métodos</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="Depósito">Depósito</option>
+                                    <option value="Qr">Qr</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroAmuralladoContratos">Estado Amurallado</label>
+                                <select id="filtroAmuralladoContratos" class="form-control">
+                                    <option value="todos">Todos</option>
+                                    <option value="amurallado">Amurallados</option>
+                                    <option value="no-amurallado">No Amurallados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerContratos" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosContratos">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosContratos">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosContratos')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosContratos">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Contrato -->
+    <div class="modal" id="modalDetallesContrato">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="modalDetallesContratoTitulo">Detalles del Contrato</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-grid">
+                    <!-- Sección Información del Lote -->
+                    <div class="detail-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Información del Lote
+                        </h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong class="detail-label">Proyecto:</strong>
+                                <span class="detail-value" id="detalleProyecto">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Manzano:</strong>
+                                <span class="detail-value" id="detalleManzano">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Lote:</strong>
+                                <span class="detail-value" id="detalleLote">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Tipo:</strong>
+                                <span class="detail-value" id="detalleTipo">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección Información del Cliente -->
+                    <div class="detail-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Información del Cliente
+                        </h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong class="detail-label">Cliente:</strong>
+                                <span class="detail-value" id="detalleCliente">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección Información Comercial -->
+                    <div class="detail-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            Información Comercial
+                        </h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong class="detail-label">Asesor:</strong>
+                                <span class="detail-value" id="detalleAsesor">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Equipo:</strong>
+                                <span class="detail-value" id="detalleEquipo">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Fecha de Firma:</strong>
+                                <span class="detail-value" id="detalleFechaFirma">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección Información de Pago -->
+                    <div class="detail-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Información de Pago
+                        </h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong class="detail-label">Método de Pago:</strong>
+                                <span class="detail-value" id="detalleMetodoPago">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Monto:</strong>
+                                <span class="detail-value" id="detalleMonto">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Estado:</strong>
+                                <span class="detail-value" id="detalleEstado">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalDetallesContrato')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Equipo -->
+    <div class="modal" id="modalCrearEquipo">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Crear Nuevo Equipo</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="equipoNombre">Nombre del Equipo *</label>
+                    <input type="text" id="equipoNombre" class="form-control" 
+                        placeholder="Ingresa el nombre del equipo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Seleccionar Miembros *</label>
+                    <div class="agentes-selection-container">
+                        <div class="agentes-list" id="agentesDisponibles">
+                            <!-- Los agentes se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Miembros Seleccionados</label>
+                    <div class="miembros-seleccionados" id="equipoMiembros">
+                        <!-- Los miembros seleccionados aparecerán aquí -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalCrearEquipo')">
+                    Cancelar
+                </button>
+                <button class="btn btn-success" onclick="app.modules.equipos.crearEquipo()">
+                    <i class="fas fa-save"></i> Crear Equipo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Equipo -->
+    <div class="modal" id="modalDetallesEquipo">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3 id="modalDetallesEquipoTitulo">Detalles del Equipo</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-grid" id="detallesEquipoBody">
+                    <!-- Los detalles se cargarán dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalDetallesEquipo')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Revisar Prórroga -->
+    <div class="modal" id="modalRevisarProrroga">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Revisar Solicitud de Prórroga</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="prorrogaId" />
+                
+                <!-- Información de la solicitud -->
+                <div class="info-card mb-3">
+                    <h4>Información de la Solicitud</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Cliente:</strong>
+                            <span id="prorrogaClienteInfo">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Asesor:</strong>
+                            <span id="prorrogaAsesorInfo">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Fecha Solicitud:</strong>
+                            <span id="prorrogaFechaSolicitud">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Fecha Límite Original:</strong>
+                            <span id="prorrogaFechaLimite">-</span>
+                        </div>
+                        <div class="info-item full-width">
+                            <strong>Descripción:</strong>
+                            <p id="prorrogaDescripcion" class="description-text">-</p>
+                        </div>
+                        <div class="info-item full-width" id="prorrogaImagenContainer" style="display: none;">
+                            <strong>Imagen Adjunta:</strong>
+                            <div class="image-preview">
+                                <img id="prorrogaImagenPreview" src="" alt="Imagen de prórroga" style="max-width: 100%; max-height: 200px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de revisión -->
+                <div class="form-group">
+                    <label for="prorrogaAccion">Acción *</label>
+                    <select id="prorrogaAccion" class="form-control" required>
+                        <option value="">Seleccionar acción...</option>
+                        <option value="aprobado">Aprobar</option>
+                        <option value="rechazado">Rechazar</option>
+                    </select>
+                </div>
+
+                <!-- Campo para días extra (solo visible cuando se aprueba) -->
+                <div class="form-group" id="diasExtraGroup" style="display: none;">
+                    <label for="prorrogaDiasExtra">Días Extra a Conceder *</label>
+                    <input type="number" id="prorrogaDiasExtra" class="form-control" 
+                        min="1" max="30" placeholder="Ej: 7">
+                    <small class="form-text text-muted">
+                        La nueva fecha límite será: <span id="nuevaFechaLimite">-</span>
+                    </small>
+                </div>
+
+                <!-- Comentario (opcional) -->
+                <div class="form-group">
+                    <label for="prorrogaComentario">Comentario (Opcional)</label>
+                    <textarea id="prorrogaComentario" class="form-control" rows="3" 
+                        placeholder="Agregue un comentario sobre su decisión..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalRevisarProrroga')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnGuardarRevision">
+                    <i class="fas fa-check"></i> Guardar Decisión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Detalles Prórroga -->
+    <div class="modal" id="modalDetallesProrroga">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Detalles Completos de la Prórroga</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-grid" id="detallesProrrogaBody">
+                    <!-- Los detalles se cargarán dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalDetallesProrroga')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Prórrogas -->
+    <div class="modal" id="modalFiltrosProrrogas">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Prórrogas</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas de Solicitud</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioProrrogas">Desde</label>
+                                <input type="date" id="fechaInicioProrrogas" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinProrrogas">Hasta</label>
+                                <input type="date" id="fechaFinProrrogas" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Estado -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="filtroEstadoProrrogas">Estado</label>
+                        <select id="filtroEstadoProrrogas" class="form-control">
+                            <option value="todos">Todos los estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="aprobado">Aprobado</option>
+                            <option value="rechazado">Rechazado</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Asesor -->
+                    <div class="filter-group" id="prorrogafiltroAgenteGroup" style="display: none;">
+                        <label class="filter-label" for="filtroAsesorProrrogas">Asesor</label>
+                        <select id="filtroAsesorProrrogas" class="form-control">
+                            <option value="todos">Todos los asesores</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerProrrogas" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosProrrogas">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosProrrogas">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosProrrogas')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosProrrogas">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Ranking CORREGIDO -->
+    <div class="modal" id="modalFiltrosRanking">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Ranking</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Selector de Tipo de Ranking DENTRO del modal -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="rankingTipo">Tipo de Ranking</label>
+                        <select id="rankingTipo" class="form-control">
+                            <option value="asesor">Por Asesor</option>
+                            <option value="equipo">Por Equipo</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioRanking">Desde</label>
+                                <input type="date" id="fechaInicioRanking" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinRanking">Hasta</label>
+                                <input type="date" id="fechaFinRanking" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Proyecto -->
+                    <div class="filter-group">
+                        <label class="filter-label" for="filtroProyectoRanking">Proyecto</label>
+                        <select id="filtroProyectoRanking" class="form-control">
+                            <option value="todos">Todos los proyectos</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerRanking" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosRanking">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosRanking">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosRanking')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosRanking">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Detalles Reserva -->
+    <div class="modal" id="modalDetallesReserva">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="modalDetallesReservaTitulo">Detalles de la Reserva</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="detallesReservaBody">
+                <!-- Los detalles se cargarán dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalDetallesReserva')">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Filtros para Reservas - ESTRUCTURA CORREGIDA -->
+    <div class="modal" id="modalFiltrosReservas">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Reservas</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas de Reserva</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioReservas">Desde</label>
+                                <input type="date" id="fechaInicioReservas" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinReservas">Hasta</label>
+                                <input type="date" id="fechaFinReservas" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Proyecto y Agente -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroProyectoReservas">Proyecto</label>
+                                <select id="filtroProyectoReservas" class="form-control">
+                                    <option value="todos">Todos los proyectos</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="reservasfiltroAgenteGroup">
+                                <label class="filter-label" for="filtroAgenteReservas">Agente</label>
+                                <select id="filtroAgenteReservas" class="form-control">
+                                    <option value="todos">Todos los agentes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Estado y Método de Pago -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroEstadoReservas">Estado</label>
+                                <select id="filtroEstadoReservas" class="form-control">
+                                    <option value="todos">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="En espera">En Espera</option>
+                                    <option value="firmado">Firmado</option>
+                                    <option value="declinada_sd">Declinada S/D</option>
+                                    <option value="declinada_cd">Declinada C/D</option>
+                                    <option value="Expirado">Expirado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroMetodoPagoReservas">Método de Pago</label>
+                                <select id="filtroMetodoPagoReservas" class="form-control">
+                                    <option value="todos">Todos los métodos</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                    <option value="Depósito">Depósito</option>
+                                    <option value="Qr">Qr</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Aplicados -->
+                    <div class="filter-group" id="filtrosAplicadosContainerReservas" style="display: none;">
+                        <label class="filter-label">Filtros Activos</label>
+                        <div class="filtros-activos" id="filtrosAplicadosReservas">
+                            <!-- Los filtros activos se mostrarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosReservas">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosReservas')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosReservas">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ampliar Reserva -->
+    <div class="modal" id="modalAmpliarReserva">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Ampliar Reserva</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ampliarReservaId" />
+                
+                <div class="ampliar-options">
+                    <div class="ampliar-option" data-dias="7">
+                        <div class="option-icon">
+                            <i class="fas fa-calendar-plus" style="color: black;"></i>
+                        </div>
+                        <div class="option-content">
+                            <h4>Ampliar por 7 días</h4>
+                            <p>Extender el plazo de la reserva por una semana adicional</p>
+                        </div>
+                    </div>
+                    
+                    <div class="ampliar-option" data-dias="20">
+                        <div class="option-icon">
+                            <i class="fas fa-calendar-week" style="color: black;"></i>
+                        </div>
+                        <div class="option-content">
+                            <h4>Ampliar por 20 días</h4>
+                            <p>Extender el plazo de la reserva por 20 días adicionales</p>
+                        </div>
+                    </div>
+                    
+                    <div class="ampliar-option" data-dias="personalizado">
+                        <div class="option-icon">
+                            <i class="fas fa-signature" style="color: black;"></i>
+                        </div>
+                        <div class="option-content">
+                            <h4>Programar Firma</h4>
+                            <p>Establecer una fecha específica para la firma del contrato</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalAmpliarReserva')">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <!-- Al final de tu body, ORDEN OPTIMIZADO -->
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/ui.js"></script>  
+    <script src="js/core/api.js"></script>
+
+    <!-- Módulos -->
+    <script src="js/modules/dashboard.js"></script>
+    <script src="js/modules/prospectos.js"></script>
+    <script src="js/modules/clientes.js"></script>
+    <script src="js/modules/agentes.js"></script>
+    <script src="js/modules/contratos.js"></script>
+    <script src="js/modules/equipos.js"></script>
+    <script src="js/modules/prorrogas.js"></script>
+    <script src="js/modules/ranking.js"></script>
+    <script src="js/modules/reservas.js"></script>
+
+    <!-- Script principal AL FINAL -->
+    <script src="js/app.js"></script>
+</body>
+</html>

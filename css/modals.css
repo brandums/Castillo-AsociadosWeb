@@ -1,0 +1,695 @@
+/* css/modals.css */
+/* Modal Overlay */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1100;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal Content */
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+.modal-lg .modal-content {
+    max-width: 800px;
+}
+
+.modal-sm .modal-content {
+    max-width: 400px;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background: var(--gray-100);
+    color: var(--danger);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--gray-50);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* Actions Modal Specific */
+.actions-modal .modal-content {
+    max-width: 300px;
+}
+
+.actions-modal .modal-body {
+    padding: 0;
+}
+
+.actions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.action-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.action-list-item:last-child {
+    border-bottom: none;
+}
+
+.action-list-item:hover {
+    background: var(--gray-50);
+    color: var(--primary);
+}
+
+.action-list-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.action-list-item.danger {
+    color: var(--danger);
+}
+
+.action-list-item.danger:hover {
+    background: rgba(230, 57, 70, 0.1);
+}
+
+/* Filters Panel */
+.filters-panel {
+    padding: 1.5rem;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin: 0;
+}
+
+.filter-group-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group-row .form-control {
+    flex: 1;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modal Sizes */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    .filters-panel {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .filter-group-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Scrollbar for Modal Body */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: var(--gray-100);
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Estilos para el modal de filtros */
+.modal-lg {
+    max-width: 600px;
+}
+
+.filters-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 0.25rem;
+}
+
+.date-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.filtros-activos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filtro-activo {
+    background: var(--primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filtro-activo .remove-filtro {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filtro-activo .remove-filtro:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Indicador de filtros activos en el botón */
+.btn-filtros-activos {
+    position: relative;
+}
+
+.btn-filtros-activos::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    background: var(--warning);
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+
+
+
+
+
+
+
+/* Modal contratos */
+/* Estilos para el modal de detalles del contrato */
+.details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid #3b82f6;
+}
+
+.detail-section .section-title {
+    color: #374151;
+    font-size: 1.1em;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-section .section-title i {
+    color: #6b7280;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #6b7280;
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.detail-value {
+    color: #374151;
+    font-weight: 400;
+    text-align: right;
+    flex: 1;
+}
+
+.text-success {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.text-danger {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #6b7280;
+}
+
+/* Estilos para la columna de acción móvil */
+.actions-column-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .actions-column-mobile {
+        display: table-cell;
+        text-align: center;
+    }
+    
+    .col-hide-mobile {
+        display: none;
+    }
+    
+    .btn-ver-mas {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-ver-mas:hover {
+        background: #2563eb;
+    }
+    
+    .btn-text {
+        display: inline;
+    }
+    
+    @media (max-width: 480px) {
+        .btn-text {
+            display: none;
+        }
+        
+        .btn-ver-mas {
+            padding: 6px 8px;
+        }
+    }
+}
+
+/* Bordes para los tipos de contrato */
+.fila-borde-verde {
+    border-left: 4px solid #10b981 !important;
+}
+
+.fila-borde-ladrillo {
+    border-left: 4px solid #dc2626 !important;
+}
+
+/* Estilos para la información del lote */
+.lote-info {
+    margin-top: 5px;
+    font-size: 0.85em;
+}
+
+.lote-detail {
+    margin: 2px 0;
+    color: #666;
+}
+
+.lote-detail strong {
+    color: #333;
+}
+
+
+
+
+
+/* estilos para el modal Reservas Ampliar */
+/* Estilos para el modal de ampliar reserva */
+.ampliar-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ampliar-option {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+}
+
+.ampliar-option:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ampliar-option.selected {
+    border-color: var(--primary-color);
+    background: rgba(74, 144, 226, 0.05);
+}
+
+.option-icon {
+    margin-right: 1rem;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    font-size: 1.25rem;
+}
+
+.option-content h4 {
+    margin: 0 0 0.25rem 0;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.option-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Estilos para el contenido de SweetAlert */
+.swal-content {
+    text-align: center;
+}
+
+.swal-content p {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.swal2-input {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    padding: 0.75rem !important;
+    font-size: 1rem !important;
+    color: var(--text-primary) !important;
+    background: var(--card-bg) !important;
+}
+
+.swal2-input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+
+/* Estilos para el modal de declinar reserva */
+.declinar-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.declinar-option {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.declinar-option:hover {
+    border-color: #dc3545;
+    background: #fff5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+}
+
+.declinar-option.selected {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.declinar-option .option-icon {
+    margin-right: 1rem;
+    padding: 0.75rem;
+    background: #dc3545;
+    color: white;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.declinar-option .option-content h4 {
+    margin: 0 0 0.25rem 0;
+    color: #212529;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.declinar-option .option-content p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Ajustes para SweetAlert más ancho */
+.swal2-popup.declinar-swal {
+    width: 600px !important;
+    max-width: 90vw;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .declinar-option {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .declinar-option .option-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .swal2-popup.declinar-swal {
+        width: 95vw !important;
+        margin: 0 10px !important;
+    }
+}
+
+.swal-content {
+    text-align: left;
+}
+
+.swal-content .form-group {
+    margin-bottom: 15px;
+}
+
+.swal-content .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.swal-content select.swal2-input,
+.swal-content input.swal2-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.swal-content .text-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.swal-content strong {
+    color: #2c3e50;
+}
