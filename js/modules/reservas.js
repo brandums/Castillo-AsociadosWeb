@@ -37,6 +37,8 @@ class Reservas {
     }
 
     async init() {
+
+
         this.allProspectos = await this.app.api.loadAllProspectos();
 
         this.reservasOriginales = this.app.getReservas();
@@ -60,23 +62,37 @@ class Reservas {
     }
 
     async refreshData() {
-    try {
-        await this.app.refreshGlobalData("reservas");
-        this.reservasOriginales = this.app.getReservas();
-        this.datos = [...this.reservasOriginales];
-        
-        await this.renderTable();
-        
-        return true;
-    } catch (error) {
-        console.error('Error refreshing data:', error);
-        return false;
+        try {
+            await this.app.refreshGlobalData("reservas");
+            this.reservasOriginales = this.app.getReservas();
+            this.datos = [...this.reservasOriginales];
+            
+            await this.renderTable();
+            
+            return true;
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+            return false;
+        }
     }
-}
 
     setupEventListeners() {
         if (this.eventListenersSetup) return;
         this.eventListenersSetup = true;
+
+        const btnCrear = document.getElementById('btnCrearReserva');
+        if (btnCrear) {
+            if (this.isAdmin()) {
+                btnCrear.style.display = 'none';
+            } else {
+                if (!btnCrear.hasListener) {
+                    btnCrear.hasListener = true;
+                    btnCrear.addEventListener('click', () => {
+                        this.mostrarModalCrearReserva();
+                    });
+                }
+            }
+        }
 
         // Búsqueda
         const searchInput = document.getElementById('reservasSearch');
@@ -193,6 +209,249 @@ class Reservas {
         }
         
         this.actualizarIndicadorFiltros();
+    }
+
+    mostrarModalCrearReserva() {
+        try {
+            // Cargar datos en los selects
+            this.cargarClientesEnModal();
+            this.cargarProyectosEnModal();
+            
+            // Resetear el formulario
+            this.resetearFormularioCrearReserva();
+            
+            // Configurar event listeners para el modal
+            this.configurarEventListenersModal();
+            
+            // Mostrar el modal
+            UI.showModal('modalCrearReserva');
+            
+        } catch (error) {
+            console.error('Error al mostrar modal de crear reserva:', error);
+            UI.showAlert('Error al cargar el formulario de reserva', 'error');
+        }
+    }
+
+    cargarClientesEnModal() {
+        const selectCliente = document.getElementById('reservaCliente');
+        if (!selectCliente) return;
+        
+        selectCliente.innerHTML = '<option value="">Seleccionar cliente...</option>';
+
+        const prospectos = this.app.getProspectos();
+        
+        // Obtener fecha actual
+        const hoy = new Date();
+        
+        // Filtrar prospectos que tengan fecha dentro de los últimos 30 días
+        const prospectosFiltrados = prospectos.filter(cliente => {
+            if (!cliente.fecha) return false; // Si no tiene fecha, no mostrar
+            
+            const fechaCliente = new Date(cliente.fecha);
+            const diffMs = hoy - fechaCliente; // diferencia en milisegundos
+            const diffDias = diffMs / (1000 * 60 * 60 * 24); // convertir a días
+            
+            return diffDias <= 30; // solo mostrar si tiene 30 días o menos
+        });
+        
+        // Ordenar por fecha más reciente primero
+        prospectosFiltrados.sort((a, b) => {
+            const fechaA = new Date(a.fecha);
+            const fechaB = new Date(b.fecha);
+            return fechaB - fechaA; // más reciente primero
+        });
+        
+        prospectosFiltrados.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = `${cliente.nombre} ${cliente.apellido}`;
+            selectCliente.appendChild(option);
+        });
+        
+        // Mostrar mensaje si no hay prospectos recientes
+        if (prospectosFiltrados.length === 0) {
+            selectCliente.innerHTML = '<option value="">No hay prospectos recientes (últimos 30 días)</option>';
+        }
+    }
+
+    cargarProyectosEnModal() {
+        const selectProyecto = document.getElementById('reservaProyecto');
+        if (!selectProyecto) return;
+        
+        const proyectos = this.app.getProyectos();
+        selectProyecto.innerHTML = '<option value="">Seleccionar proyecto...</option>';
+        
+        proyectos.forEach(proyecto => {
+            const option = document.createElement('option');
+            option.value = proyecto.id;
+            option.textContent = proyecto.nombre;
+            selectProyecto.appendChild(option);
+        });
+    }
+
+    resetearFormularioCrearReserva() {
+        const form = document.getElementById('formCrearReserva');
+        if (form) {
+            form.reset();
+        }
+        
+        // Limpiar el select de montos
+        const montoSelect = document.getElementById('reservaMonto');
+        if (montoSelect) {
+            montoSelect.innerHTML = '<option value="">Seleccionar monto...</option>';
+        }
+    }
+
+    configurarEventListenersModal() {
+        // Event listener para el botón guardar
+        const btnGuardar = document.getElementById('btnGuardarReserva');
+        if (btnGuardar && !btnGuardar.hasListener) {
+            btnGuardar.hasListener = true;
+            btnGuardar.addEventListener('click', () => {
+                this.guardarReserva();
+            });
+        }
+        
+        // Event listener para actualizar opciones de monto cuando cambia el proyecto
+        const selectProyecto = document.getElementById('reservaProyecto');
+        if (selectProyecto && !selectProyecto.hasListener) {
+            selectProyecto.hasListener = true;
+            selectProyecto.addEventListener('change', () => {
+                this.actualizarOpcionesMonto();
+            });
+        }
+    }
+
+    actualizarOpcionesMonto() {
+        const proyectoSelect = document.getElementById('reservaProyecto');
+        const montoSelect = document.getElementById('reservaMonto');
+        
+        if (!proyectoSelect || !montoSelect) return;
+        
+        const proyectoId = proyectoSelect.value;
+        
+        // Limpiar opciones anteriores
+        montoSelect.innerHTML = '<option value="">Seleccionar monto...</option>';
+
+        // Agregar opción de Precio Feria para todos los proyectos
+        montoSelect.innerHTML += `
+            <option value="100">100 Bs (Precio Feria - 7 días)</option>
+        `;
+
+        // Agregar opciones específicas por proyecto (igual que en tu código anterior)
+        if (proyectoId === '2') { // VILLA DEL SUR
+            montoSelect.innerHTML += `
+                <option value="200">200 Bs (7 días)</option>
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
+        } else if (proyectoId === '1') { // SUCINI
+            montoSelect.innerHTML += `
+                <option value="290">290 Bs (7 días)</option>
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
+        } else if (proyectoId === '3') { // LAS LOMAS
+            montoSelect.innerHTML += `
+                <option value="340">340 Bs (7 días)</option>
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
+        } else {
+            // Para otros proyectos, solo mostrar 1000 Bs
+            montoSelect.innerHTML += `
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
+        }
+    }
+
+    async crearReserva(datosReserva) {
+        try {
+            // Usar el método post genérico del api service
+            const resultado = await this.app.api.post('/reservas', datosReserva);
+            return resultado;
+        } catch (error) {
+            console.error('Error en crearReserva:', error);
+            throw error;
+        }
+    }
+
+    async guardarReserva() {
+        try {
+            // Obtener valores del formulario
+            const formData = this.obtenerDatosFormulario();
+            
+            // Validar formulario
+            if (!this.validarFormularioReserva(formData)) {
+                return;
+            }
+            
+            // Mostrar loading
+            UI.showLoading(document.getElementById('modalCrearReserva'));
+            
+            // Llamar a nuestro nuevo método crearReserva
+            const resultado = await this.crearReserva(formData);
+            
+            // Ocultar loading
+            UI.hideLoading(document.getElementById('modalCrearReserva'));
+            
+            // Mostrar mensaje de éxito
+            UI.showAlert('Reserva creada exitosamente', 'success');
+            
+            // Cerrar modal
+            UI.closeModal('modalCrearReserva');
+            
+            // Recargar datos y tabla
+            await this.refreshData();
+            
+        } catch (error) {
+            console.error('Error al crear reserva:', error);
+            UI.hideLoading(document.getElementById('modalCrearReserva'));
+            
+            let mensajeError = 'Error al crear la reserva';
+            if (error.message.includes('Ya existe una reserva activa')) {
+                mensajeError = 'Ya existe una reserva activa para este Proyecto, Manzano y Lote';
+            } else if (error.message.includes('Faltan datos requeridos')) {
+                mensajeError = 'Por favor complete todos los campos requeridos';
+            }
+            
+            UI.showAlert(mensajeError, 'error');
+        }
+    }
+
+    obtenerDatosFormulario() {
+        return {
+            clienteId: document.getElementById('reservaCliente').value,
+            proyectoId: document.getElementById('reservaProyecto').value,
+            manzano: document.getElementById('reservaManzano').value,
+            nroTerreno: document.getElementById('reservaLote').value,
+            montoReserva: parseFloat(document.getElementById('reservaMonto').value) || 0,
+            metodoPago: document.getElementById('reservaMetodoPago').value,
+            formularioNro: document.getElementById('reservaFormularioNro').value,
+            observacion: document.getElementById('reservaObservaciones').value
+        };
+    }
+
+    validarFormularioReserva(formData) {
+        const camposRequeridos = [
+            { campo: formData.clienteId, nombre: 'Cliente' },
+            { campo: formData.proyectoId, nombre: 'Proyecto' },
+            { campo: formData.manzano, nombre: 'Manzano' },
+            { campo: formData.nroTerreno, nombre: 'Lote/Terreno' },
+            { campo: formData.montoReserva, nombre: 'Monto de Reserva' },
+            { campo: formData.metodoPago, nombre: 'Método de Pago' }
+        ];
+        
+        for (const { campo, nombre } of camposRequeridos) {
+            if (!campo || campo.toString().trim() === '') {
+                UI.showAlert(`El campo "${nombre}" es requerido`, 'error');
+                return false;
+            }
+        }
+        
+        if (formData.montoReserva <= 0) {
+            UI.showAlert('El monto de reserva debe ser mayor a 0', 'error');
+            return false;
+        }
+        
+        return true;
     }
 
     mostrarModalFiltros() {
