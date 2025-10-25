@@ -533,7 +533,7 @@ class Reservas {
             // Estados que NO permiten edición
             const estadosNoEditables = [
                 'Firmado', 
-                'Expirada', 
+                'Expirado', 
                 'Declinado sin Devolución', 
                 'Declinado con Devolución',
                 'Declinado S/D',
@@ -639,7 +639,7 @@ class Reservas {
             'Declinado con Devolución': 'danger',
             'Declinado S/D': 'danger',
             'Declinado C/D': 'danger',
-            'Expirada': 'secondary',
+            'Expirado': 'secondary',
             'Activa': 'primary',
             'Ampliado': 'info'
         };
@@ -655,7 +655,7 @@ class Reservas {
             'Declinado con Devolución': 'Declinado C/D',
             'Declinado S/D': 'Declinado S/D',
             'Declinado C/D': 'Declinado C/D',
-            'Expirada': 'Expirada',
+            'Expirado': 'Expirado',
             'Activa': 'Activa',
             'Ampliado': 'Ampliado'
         };
