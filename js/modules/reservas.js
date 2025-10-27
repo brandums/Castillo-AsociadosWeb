@@ -1649,8 +1649,25 @@ class Reservas {
             focusConfirm: false,
             width: '500px', // Ancho fijo
             preConfirm: () => {
-                // ... validaciones igual que antes ...
+                const metodoPago = document.getElementById('metodoPagoFirma')?.value;
+                const montoStr = document.getElementById('montoFirma')?.value;
+                const monto = parseFloat(montoStr);
+
+                // Validaciones
+                if (!metodoPago) {
+                    Swal.showValidationMessage('Por favor, selecciona un método de pago.');
+                    return false;
+                }
+
+                if (!montoStr || isNaN(monto) || monto <= 0) {
+                    Swal.showValidationMessage('Por favor, ingresa un monto válido mayor a 0.');
+                    return false;
+                }
+
+                // Retornar valores al then()
+                return { metodoPago, monto };
             },
+
             didOpen: () => {
                 // Asegurar que los inputs tengan el ancho correcto
                 setTimeout(() => {
