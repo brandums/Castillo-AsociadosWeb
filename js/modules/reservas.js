@@ -436,7 +436,8 @@ class Reservas {
             { campo: formData.manzano, nombre: 'Manzano' },
             { campo: formData.nroTerreno, nombre: 'Lote/Terreno' },
             { campo: formData.montoReserva, nombre: 'Monto de Reserva' },
-            { campo: formData.metodoPago, nombre: 'Método de Pago' }
+            { campo: formData.metodoPago, nombre: 'Método de Pago' },
+            { campo: formData.formularioNro, nombre: 'Número de Formulario' }
         ];
         
         for (const { campo, nombre } of camposRequeridos) {
