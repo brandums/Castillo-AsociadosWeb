@@ -618,6 +618,12 @@
                         <table class="data-table" id="prorrogasTable">
                             <thead>
                                 <tr>
+                                    <th class="checkbox-cell">
+                                        <label class="custom-checkbox">
+                                            <input type="checkbox" id="selectAllCheckbox">
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </th>
                                     <th>Cliente</th>
                                     <th class="col-hide-mobile">Asesor</th>
                                     <th class="col-hide-mobile">Fecha Solicitud</th>
@@ -2029,10 +2035,65 @@
         </div>
     </div>
 
+    <!-- ✨ Barra de acciones flotante -->
+    <div class="bulk-actions-bar" id="bulkActionsBar">
+        <div class="bulk-actions-info">
+            <span class="bulk-actions-count" id="selectedCount">0</span>
+            <span>prórrogas seleccionadas</span>
+        </div>
+        <div class="bulk-actions-buttons">
+            <button class="bulk-action-btn approve" id="bulkApproveBtn">
+                <i class="fas fa-check-circle"></i>
+                Aprobar
+            </button>
+            <button class="bulk-action-btn reject" id="bulkRejectBtn">
+                <i class="fas fa-times-circle"></i>
+                Rechazar
+            </button>
+            <button class="bulk-action-btn cancel" id="bulkCancelBtn">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- ✨ Modal para acción múltiple -->
+    <div class="modal" id="bulkActionModal">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3 id="bulkModalTitle">Acción Múltiple</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-items-list" id="selectedItemsList">
+                    <!-- Se llenarán las prórrogas seleccionadas -->
+                </div>
+
+                <div class="form-group" id="bulkDiasExtraGroup">
+                    <label for="bulkDiasExtra">Días Extra *</label>
+                    <input type="number" id="bulkDiasExtra" class="form-control" min="1" max="30" value="7">
+                </div>
+
+                <div class="form-group">
+                    <label for="bulkComentario">Comentario (Opcional)</label>
+                    <textarea id="bulkComentario" class="form-control" placeholder="Agregue un comentario..." rows="3"></textarea>
+                </div>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="bulkInfoText">Esta acción se aplicará a todas las prórrogas seleccionadas.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="bulkModalCancel">Cancelar</button>
+                <button class="btn btn-primary" id="bulkModalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    <!-- Al final de tu body, ORDEN OPTIMIZADO -->
     <script src="js/core/auth.js"></script>
     <script src="js/core/utils.js"></script>
     <script src="js/core/ui.js"></script>  

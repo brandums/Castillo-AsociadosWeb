@@ -17,7 +17,10 @@ class Prorrogas {
         };
         this.ordenDescendente = false;
         this.eventListenersSetup = false;
-        this.paginationInitialized = false; // Añadido para consistencia
+        this.paginationInitialized = false;
+
+        this.selectedProrrogas = new Set();
+        this.currentBulkAction = null;
     }
 
     // Métodos de utilidad para roles
@@ -268,6 +271,47 @@ class Prorrogas {
             });
             this.paginationInitialized = true;
         }
+
+        const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+        if (bulkApproveBtn && !bulkApproveBtn.hasListener) {
+            bulkApproveBtn.hasListener = true;
+            bulkApproveBtn.addEventListener('click', () => {
+                this.openBulkActionModal('aprobar');
+            });
+        }
+
+        const bulkRejectBtn = document.getElementById('bulkRejectBtn');
+        if (bulkRejectBtn && !bulkRejectBtn.hasListener) {
+            bulkRejectBtn.hasListener = true;
+            bulkRejectBtn.addEventListener('click', () => {
+                this.openBulkActionModal('rechazar');
+            });
+        }
+
+        const bulkCancelBtn = document.getElementById('bulkCancelBtn');
+        if (bulkCancelBtn && !bulkCancelBtn.hasListener) {
+            bulkCancelBtn.hasListener = true;
+            bulkCancelBtn.addEventListener('click', () => {
+                this.clearSelection();
+            });
+        }
+
+        // ✨ NUEVO: Confirmar acción múltiple
+        const bulkModalConfirm = document.getElementById('bulkModalConfirm');
+        if (bulkModalConfirm && !bulkModalConfirm.hasListener) {
+            bulkModalConfirm.hasListener = true;
+            bulkModalConfirm.addEventListener('click', () => {
+                this.processBulkAction();
+            });
+        }
+
+        const bulkModalCancel = document.getElementById('bulkModalCancel');
+        if (bulkModalCancel && !bulkModalCancel.hasListener) {
+            bulkModalCancel.hasListener = true;
+            bulkModalCancel.addEventListener('click', () => {
+                UI.closeModal('bulkActionModal');
+            });
+        }
         
         this.actualizarIndicadorFiltros();
     }
@@ -336,7 +380,7 @@ class Prorrogas {
         if (paginado.datos.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="table-empty">
+                    <td colspan="7" class="table-empty">
                         <i class="fas fa-clock"></i>
                         <h3>No se encontraron prórrogas</h3>
                         <p>No hay solicitudes de prórroga que coincidan con los filtros aplicados.</p>
@@ -350,9 +394,23 @@ class Prorrogas {
             const estadoBadge = this.getEstadoBadge(prorroga.estado);
             const esAdmin = this.isAdmin();
             const estaPendiente = prorroga.estado === 'pendiente';
+            const isSelected = this.selectedProrrogas.has(prorroga.id);
 
             return `
-                <tr>
+                <tr data-prorroga-id="${prorroga.id}" data-status="${prorroga.estado}" class="${isSelected ? 'selected' : ''}">
+                    <td class="checkbox-cell">
+                        ${estaPendiente ? `
+                        <label class="custom-checkbox">
+                            <input type="checkbox" class="prorroga-checkbox" ${isSelected ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                        </label>
+                        ` : `
+                        <label class="custom-checkbox">
+                            <input type="checkbox" class="prorroga-checkbox" disabled>
+                            <span class="checkmark"></span>
+                        </label>
+                        `}
+                    </td>
                     <td>
                         <div class="mobile-cell-content">
                             <div class="main-info">${prorroga.clienteNombre}</div>
@@ -388,6 +446,8 @@ class Prorrogas {
             `;
         }).join('');
 
+        this.updateSelectAllCheckbox();
+        this.setupCheckboxListeners();
         this.setupActionListeners();
     }
 
@@ -906,5 +966,174 @@ class Prorrogas {
 
     onTabShow() {
         this.loadData();
+    }
+
+    setupCheckboxListeners() {
+        // Checkbox principal
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.onclick = () => {
+                const checkboxes = document.querySelectorAll('.prorroga-checkbox:not(:disabled)');
+                const shouldCheck = selectAllCheckbox.checked;
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = shouldCheck;
+                    const row = checkbox.closest('tr');
+                    const prorrogaId = row.dataset.prorrogaId;
+                    
+                    if (shouldCheck) {
+                        this.selectedProrrogas.add(prorrogaId);
+                        row.classList.add('selected');
+                    } else {
+                        this.selectedProrrogas.delete(prorrogaId);
+                        row.classList.remove('selected');
+                    }
+                });
+                
+                this.updateBulkActionsBar();
+            };
+        }
+
+        // Checkboxes individuales
+        document.querySelectorAll('.prorroga-checkbox').forEach(checkbox => {
+            checkbox.onclick = () => {
+                const row = checkbox.closest('tr');
+                const prorrogaId = row.dataset.prorrogaId;
+                
+                if (checkbox.checked) {
+                    this.selectedProrrogas.add(prorrogaId);
+                    row.classList.add('selected');
+                } else {
+                    this.selectedProrrogas.delete(prorrogaId);
+                    row.classList.remove('selected');
+                }
+                
+                this.updateSelectAllCheckbox();
+                this.updateBulkActionsBar();
+            };
+        });
+    }
+
+    // ✨ NUEVO: Actualizar checkbox principal
+    updateSelectAllCheckbox() {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (!selectAllCheckbox) return;
+        
+        const checkboxes = document.querySelectorAll('.prorroga-checkbox:not(:disabled)');
+        const checkedCount = document.querySelectorAll('.prorroga-checkbox:checked').length;
+        
+        selectAllCheckbox.checked = checkedCount > 0 && checkedCount === checkboxes.length;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+    }
+
+    // ✨ NUEVO: Actualizar barra de acciones
+    updateBulkActionsBar() {
+        const bar = document.getElementById('bulkActionsBar');
+        const count = document.getElementById('selectedCount');
+        
+        if (!bar || !count) return;
+        
+        count.textContent = this.selectedProrrogas.size;
+        
+        if (this.selectedProrrogas.size > 0) {
+            bar.classList.add('show');
+        } else {
+            bar.classList.remove('show');
+        }
+    }
+
+    // ✨ NUEVO: Abrir modal de acción múltiple
+    openBulkActionModal(action) {
+        this.currentBulkAction = action;
+        
+        const title = action === 'aprobar' ? 'Aprobar Prórrogas Seleccionadas' : 'Rechazar Prórrogas Seleccionadas';
+        document.getElementById('bulkModalTitle').textContent = title;
+        
+        // Mostrar/ocultar días extra
+        const diasExtraGroup = document.getElementById('bulkDiasExtraGroup');
+        if (diasExtraGroup) {
+            diasExtraGroup.style.display = action === 'aprobar' ? 'block' : 'none';
+        }
+        
+        // Actualizar texto info
+        const infoText = action === 'aprobar' 
+            ? 'Se aprobarán todas las prórrogas seleccionadas con los mismos días extra.'
+            : 'Se rechazarán todas las prórrogas seleccionadas.';
+        document.getElementById('bulkInfoText').textContent = infoText;
+        
+        // Llenar lista de prórrogas seleccionadas
+        const list = document.getElementById('selectedItemsList');
+        if (list) {
+            list.innerHTML = '';
+            this.selectedProrrogas.forEach(id => {
+                const prorroga = this.datos.find(p => p.id === id);
+                if (prorroga) {
+                    const div = document.createElement('div');
+                    div.className = 'selected-item';
+                    div.innerHTML = `<i class="fas fa-user"></i> ${prorroga.clienteNombre} - ${prorroga.asesorNombre}`;
+                    list.appendChild(div);
+                }
+            });
+        }
+        
+        UI.showModal('bulkActionModal');
+    }
+
+    // ✨ NUEVO: Procesar acción múltiple
+    async processBulkAction() {
+        const diasExtra = document.getElementById('bulkDiasExtra')?.value;
+        const comentario = document.getElementById('bulkComentario')?.value;
+        
+        if (this.currentBulkAction === 'aprobar' && (!diasExtra || parseInt(diasExtra) <= 0)) {
+            UI.showAlert('Por favor, ingrese días extra válidos', 'warning');
+            return;
+        }
+        
+        try {
+            UI.showLoading();
+            
+            const promises = Array.from(this.selectedProrrogas).map(prorrogaId => {
+                return this.app.api.put(`/prorrogas/${prorrogaId}`, {
+                    estado: this.currentBulkAction === 'aprobar' ? 'aprobado' : 'rechazado',
+                    diasExtra: this.currentBulkAction === 'aprobar' ? parseInt(diasExtra) : undefined,
+                    comentario: comentario || undefined
+                });
+            });
+            
+            await Promise.all(promises);
+            
+            UI.hideLoading();
+            UI.showAlert(
+                `${this.selectedProrrogas.size} prórrogas ${this.currentBulkAction === 'aprobar' ? 'aprobadas' : 'rechazadas'} correctamente`, 
+                'success'
+            );
+            
+            UI.closeModal('bulkActionModal');
+            this.clearSelection();
+            
+            // Recargar datos
+            await this.loadData();
+            this.renderTable();
+            
+        } catch (error) {
+            console.error('Error al procesar acciones múltiples:', error);
+            UI.hideLoading();
+            UI.showAlert(error.message || 'Error al procesar las solicitudes', 'error');
+        }
+    }
+
+    // ✨ NUEVO: Limpiar selección
+    clearSelection() {
+        this.selectedProrrogas.clear();
+        document.querySelectorAll('.prorroga-checkbox:checked').forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.closest('tr').classList.remove('selected');
+        });
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+        this.updateBulkActionsBar();
     }
 }
