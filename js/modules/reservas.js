@@ -338,6 +338,7 @@ class Reservas {
             <option value="100">100 Bs (Precio Feria - 7 días)</option>
         `;
 
+        console.log("proyecto id: ", proyectoId);
         // Agregar opciones específicas por proyecto (igual que en tu código anterior)
         if (proyectoId === '2') { // VILLA DEL SUR
             montoSelect.innerHTML += `
@@ -352,6 +353,11 @@ class Reservas {
         } else if (proyectoId === '3') { // LAS LOMAS
             montoSelect.innerHTML += `
                 <option value="340">340 Bs (7 días)</option>
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
+        } else if (proyectoId === '4') { // ROCHA
+            montoSelect.innerHTML += `
+                <option value="480">480 Bs (7 días)</option>
                 <option value="1000">1000 Bs (20 días)</option>
             `;
         } else {
