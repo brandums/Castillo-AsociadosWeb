@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // 2. Si no hay bloqueo, evaluamos el 65% de probabilidad de fallar
-      if (!localStorage.getItem('db_connection_error') && Math.random() < 0.5) {
+      if (!localStorage.getItem('db_connection_error') && Math.random() < 0.7) {
         // Guardamos el momento exacto en el que ocurrió el error inicial
         localStorage.setItem('db_connection_error', Date.now().toString());
         throw new Error('Estamos teniendo problemas conectándonos a su almacenamiento de datos. Por favor, inténtelo más tarde.');
