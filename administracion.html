@@ -393,6 +393,11 @@
                                 <i class="fas fa-download"></i>
                                 <span class="btn-text">Exportar</span>
                             </button>
+
+                            <button class="btn btn-success" id="btnCrearAgente" title="Crear Agente">
+                                <i class="fas fa-plus"></i>
+                                <span class="btn-text">Nuevo Agente</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1950,6 +1955,53 @@
                 <button class="btn btn-secondary" onclick="UI.closeModal('modalAmpliarReserva')">
                     Cancelar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Agente -->
+    <div class="modal" id="modalCrearAgente">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3>Crear Nuevo Agente</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrearAgente">
+                    <div class="form-group" style="display: none;">
+                        <!-- Hidden required fields generated automatically -->
+                    </div>
+                    <div class="form-group">
+                        <label for="agenteNombre">Nombre *</label>
+                        <input type="text" id="agenteNombre" class="form-control" required placeholder="Ej: Juan">
+                    </div>
+                    <div class="form-group">
+                        <label for="agenteApellido">Apellido *</label>
+                        <input type="text" id="agenteApellido" class="form-control" required placeholder="Ej: Perez">
+                    </div>
+                    <div class="form-group">
+                        <label for="agenteEmail">Correo Electrónico *</label>
+                        <input type="email" id="agenteEmail" class="form-control" required placeholder="Ej: juan.perez@castillo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="agentePassword">Contraseña *</label>
+                        <input type="text" id="agentePassword" class="form-control" required placeholder="Ej: Agente123!">
+                    </div>
+                    <div class="form-group">
+                        <label for="agenteTelefono">Celular / Teléfono *</label>
+                        <input type="tel" id="agenteTelefono" class="form-control" required placeholder="Ej: 71234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="agenteEquipo">Equipo (Opcional)</label>
+                        <select id="agenteEquipo" class="form-control">
+                            <option value="">Ninguno / Sin asignar...</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalCrearAgente')">Cancelar</button>
+                <button class="btn btn-primary" id="btnGuardarAgente"><i class="fas fa-save"></i> Crear Agente</button>
             </div>
         </div>
     </div>

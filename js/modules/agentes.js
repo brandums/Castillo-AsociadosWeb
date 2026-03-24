@@ -26,7 +26,7 @@ class Agentes {
     async loadData() {
         try {
             UI.showLoading(document.getElementById('agentesTab'));
-            await this.app.refreshGlobalData("estadisticas-agentes");
+            await this.app.refreshGlobalData("usuarios");
             this.datos = this.app.getAgentes();
             await this.loadEquiposParaFiltros();
             UI.hideLoading(document.getElementById('agentesTab'));
@@ -124,6 +124,24 @@ class Agentes {
             exportBtn.hasListener = true;
             exportBtn.addEventListener('click', () => {
                 this.exportData();
+            });
+        }
+
+        // Crear Agente
+        const btnCrearAgente = document.getElementById('btnCrearAgente');
+        if (btnCrearAgente && !btnCrearAgente.hasListener) {
+            btnCrearAgente.hasListener = true;
+            btnCrearAgente.addEventListener('click', () => {
+                this.mostrarModalCrearAgente();
+            });
+        }
+
+        const btnGuardarAgente = document.getElementById('btnGuardarAgente');
+        if (btnGuardarAgente && !btnGuardarAgente.hasListener) {
+            btnGuardarAgente.hasListener = true;
+            btnGuardarAgente.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.crearAgente();
             });
         }
 
@@ -533,6 +551,82 @@ class Agentes {
 
     getTitle() {
         return 'Gestión de Agentes';
+    }
+
+    async mostrarModalCrearAgente() {
+        document.getElementById('formCrearAgente').reset();
+        
+        // Cargar equipos referenciales (Team IDs)
+        const selectEquipo = document.getElementById('agenteEquipo');
+        if (selectEquipo) {
+            // Limpiar opciones previas
+            while (selectEquipo.children.length > 1) {
+                selectEquipo.removeChild(selectEquipo.lastChild);
+            }
+            
+            try {
+                // Obtener equipos directamente de la BD para tener los IDs reales
+                const equiposAPI = await this.app.api.get('/equipos');
+                equiposAPI.forEach(equipo => {
+                    const option = document.createElement('option');
+                    option.value = equipo.id;
+                    option.textContent = equipo.nombre;
+                    selectEquipo.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar la lista de equipos', error);
+            }
+        }
+        
+        UI.showModal('modalCrearAgente');
+    }
+
+    async crearAgente() {
+        const _nombre = document.getElementById('agenteNombre').value.trim();
+        const _apellido = document.getElementById('agenteApellido').value.trim();
+        const _email = document.getElementById('agenteEmail').value.trim();
+        const _password = document.getElementById('agentePassword').value.trim();
+        const _telefono = document.getElementById('agenteTelefono').value.trim();
+        const _equipoId = document.getElementById('agenteEquipo').value;
+
+        if (!_nombre || !_apellido || !_email || !_password || !_telefono) {
+            UI.showAlert('Todos los campos obligatorios deben estar llenos', 'warning');
+            return;
+        }
+
+        try {
+            document.getElementById('btnGuardarAgente').disabled = true;
+            document.getElementById('btnGuardarAgente').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            await this.app.api.post('/usuarios', {
+                nombre: _nombre,
+                apellido: _apellido,
+                celular: _telefono,
+                equipoId: _equipoId ? parseInt(_equipoId) : 0,
+                rol: "Agente",
+                email: _email,
+                password: _password
+            });
+
+            UI.closeModal('modalCrearAgente');
+            UI.showAlert('Agente creado exitosamente', 'success');
+            
+            // Recargar datos para mostrar el nuevo agente
+            await this.loadData();
+            this.renderTable();
+            
+        } catch (error) {
+            console.error('Error al crear agente:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de inserción',
+                text: error.message || 'Error al conectar con la API',
+                confirmButtonColor: '#dc3545'
+            });
+        } finally {
+            document.getElementById('btnGuardarAgente').disabled = false;
+            document.getElementById('btnGuardarAgente').innerHTML = '<i class="fas fa-save"></i> Crear Agente';
+        }
     }
 
     cleanup() {

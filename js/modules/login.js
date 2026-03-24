@@ -1,4 +1,5 @@
-const API_URL = 'https://brandums-001-site1.mtempurl.com';
+//const API_URL = 'https://localhost:7240';
+const API_URL = 'https://brandums-001-site1.mtempurl.com/';
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');

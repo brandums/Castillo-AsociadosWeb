@@ -791,9 +791,9 @@ class Reservas {
             const agente = agentes.find(a => a.id.toString() === reserva.asesorId.toString());
             const cliente = clientes.find(c => c.id && c.id.toString() === reserva.clienteId.toString());
             
-            const nombreProyecto = proyecto.nombre;
-            const nombreAgente = `${agente.nombre} ${agente.apellido}`;
-            const nombreCliente = `${cliente.nombre} ${cliente.apellido}`;
+            const nombreProyecto = proyecto?.nombre || 'N/A';
+            const nombreAgente = agente ? `${agente.nombre} ${agente.apellido}` : 'N/A';
+            const nombreCliente = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'N/A';
             const montoFormateado = reserva.montoReserva + " Bs.";
             
             // Estados que NO permiten edición
