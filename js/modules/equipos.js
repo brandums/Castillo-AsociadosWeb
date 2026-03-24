@@ -423,7 +423,7 @@ class Equipos {
             if (!actionItem) return;
 
             const action = actionItem.getAttribute('data-action');
-            const equipoId = actionItem.getAttribute('data-id');
+            const equipoId = parseInt(actionItem.getAttribute('data-id'), 10);
 
             switch (action) {
                 case 'ver-detalles':

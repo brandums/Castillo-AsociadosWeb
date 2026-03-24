@@ -1,4 +1,4 @@
-const API_URL = 'https://urbanizacion-backend.fly.dev';
+const API_URL = 'https://brandums-001-site1.mtempurl.com';
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
@@ -32,29 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const password = document.getElementById('password').value.trim();
 
     try {
-      const LOCKOUT_DURATION = 3 * 60 * 1000; // 3 minutos en milisegundos
-      const errorTimestamp = localStorage.getItem('db_connection_error');
-
-      // 1. Verificar si hay un bloqueo activo
-      if (errorTimestamp) {
-        const timeElapsed = Date.now() - parseInt(errorTimestamp, 10);
-        
-        if (timeElapsed < LOCKOUT_DURATION) {
-          // Aún no pasan los 3 minutos, el error se mantiene fijo
-          throw new Error('Estamos teniendo problemas conectándonos a su almacenamiento de datos. Por favor, inténtelo más tarde.');
-        } else {
-          // Ya pasaron los 3 minutos, liberamos el bloqueo para intentar de nuevo
-          localStorage.removeItem('db_connection_error');
-        }
-      }
-
-      // 2. Si no hay bloqueo, evaluamos el 65% de probabilidad de fallar
-      if (!localStorage.getItem('db_connection_error') && Math.random() < 0.7) {
-        // Guardamos el momento exacto en el que ocurrió el error inicial
-        localStorage.setItem('db_connection_error', Date.now().toString());
-        throw new Error('Estamos teniendo problemas conectándonos a su almacenamiento de datos. Por favor, inténtelo más tarde.');
-      }
-
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

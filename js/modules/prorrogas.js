@@ -487,7 +487,7 @@ class Prorrogas {
             if (!actionItem) return;
 
             const action = actionItem.getAttribute('data-action');
-            const prorrogaId = actionItem.getAttribute('data-id');
+            const prorrogaId = parseInt(actionItem.getAttribute('data-id'), 10);
 
             switch (action) {
                 case 'ver-detalles':

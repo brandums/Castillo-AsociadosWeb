@@ -42,7 +42,7 @@ class Dashboard {
             if (this.dashboardData.datosRaw) {
                 await this.calculateTrends(
                     this.dashboardData.datosRaw.prospectos,
-                    this.dashboardData.datosRaw.contratos,
+                    this.dashboardData.datosRaw.clientes,
                     this.dashboardData.datosRaw.reservas,
                     this.dashboardData.datosRaw.contratos
                 );

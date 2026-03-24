@@ -593,7 +593,7 @@ class Prospectos {
             if (!actionItem) return;
 
             const action = actionItem.getAttribute('data-action');
-            const prospectoId = actionItem.getAttribute('data-id');
+            const prospectoId = parseInt(actionItem.getAttribute('data-id'), 10);
 
             switch (action) {
                 case 'editar':

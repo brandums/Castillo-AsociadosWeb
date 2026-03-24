@@ -1,6 +1,6 @@
 // js/common.js
 // Configuración global de la aplicación
-const API_URL = 'https://urbanizacion-backend.fly.dev'; // Reemplaza con tu URL real
+const API_URL = 'https://brandums-001-site1.mtempurl.com';
 
 // Función para formatear fechas
 function formatDate(dateString) {

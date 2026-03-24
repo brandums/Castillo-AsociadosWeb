@@ -544,7 +544,7 @@ class Contratos {
         }
 
         tbody.innerHTML = paginado.datos.map(contrato => {
-            const montoFormateado = contrato.monto ? `Bs ${parseFloat(contrato.monto).toLocaleString('es-BO')}` : 'N/A';
+            const montoFormateado = contrato.monto !== null && contrato.monto !== undefined ? `Bs ${parseFloat(contrato.monto).toLocaleString('es-BO')}` : 'N/A';
             // Usar la fecha formateada para mostrar
             const fechaFirma = contrato.fechaFirma;
             const amuralladoBadge = contrato.amurallado ? 
@@ -626,7 +626,7 @@ class Contratos {
             if (!actionItem) return;
 
             const action = actionItem.getAttribute('data-action');
-            const contratoId = actionItem.getAttribute('data-id');
+            const contratoId = parseInt(actionItem.getAttribute('data-id'), 10);
 
             switch (action) {
                 case 'ver-detalles':

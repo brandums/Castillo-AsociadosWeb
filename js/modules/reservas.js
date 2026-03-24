@@ -905,7 +905,7 @@ class Reservas {
             'Declinado con Devolución': 'danger',
             'Declinado S/D': 'danger',
             'Declinado C/D': 'danger',
-            'Expirado': 'secondary',
+            'Expirado': 'danger',
             'Activa': 'primary',
             'Ampliado': 'info'
         };
@@ -950,7 +950,7 @@ class Reservas {
             if (!actionItem) return;
 
             const action = actionItem.getAttribute('data-action');
-            const reservaId = actionItem.getAttribute('data-id');
+            const reservaId = parseInt(actionItem.getAttribute('data-id'), 10);
 
             switch (action) {
                 case 'ver-mas':
