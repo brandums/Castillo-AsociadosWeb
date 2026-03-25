@@ -1,5 +1,5 @@
 //const API_URL = 'https://localhost:7240';
-const API_URL = 'https://brandums-001-site1.mtempurl.com/';
+const API_URL = 'https://brandums-001-site1.mtempurl.com';
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
@@ -39,7 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      let data;
+      const text = await response.text();
+      try {
+          data = text ? JSON.parse(text) : {};
+      } catch (e) {
+          data = { message: `Error del servidor (${response.status}): ${text || 'Sin respuesta'}` };
+      }
 
       if (!response.ok) throw new Error(data.message || data.error || 'Credenciales incorrectas');
 

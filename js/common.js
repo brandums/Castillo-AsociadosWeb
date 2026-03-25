@@ -1,7 +1,7 @@
 // js/common.js
 // Configuración global de la aplicación
 //const API_URL = 'https://localhost:7240';
-const API_URL = 'https://brandums-001-site1.mtempurl.com/';
+const API_URL = 'https://brandums-001-site1.mtempurl.com';
 
 // Función para formatear fechas
 function formatDate(dateString) {
