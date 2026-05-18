@@ -23,6 +23,13 @@ class Agentes {
         await this.renderTable();
     }
 
+    getCurrentUser = () => this.app.auth.getUser();
+    
+    isAdmin = () => {
+        const user = this.getCurrentUser();
+        return user && user.rol === 'Admin';
+    }
+
     async loadData() {
         try {
             UI.showLoading(document.getElementById('agentesTab'));
@@ -429,7 +436,7 @@ class Agentes {
         if (paginado.datos.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="table-empty">
+                    <td colspan="6" class="table-empty">
                         <i class="fas fa-user-tie"></i>
                         <h3>No se encontraron agentes</h3>
                         <p>No hay agentes que coincidan con los filtros aplicados.</p>
@@ -439,7 +446,38 @@ class Agentes {
             return;
         }
 
+        const esAdmin = this.isAdmin();
+
         tbody.innerHTML = paginado.datos.map(agente => {
+            let badgeRol = 'secondary';
+            if (agente.rol === 'Admin') badgeRol = 'primary';
+            else if (agente.rol === 'Agente') badgeRol = 'info';
+
+            let actionsHtml = '';
+            if (esAdmin) {
+                actionsHtml = `
+                    <td class="actions-column">
+                        <div class="actions-dropdown">
+                            <button class="actions-toggle">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="actions-menu">
+                                <button class="action-item" data-action="cambiar-rol" data-id="${agente.id}" data-rol="${agente.rol}">
+                                    <i class="fas fa-user-tag"></i>
+                                    Cambiar Rol
+                                </button>
+                                <button class="action-item action-danger" data-action="eliminar-agente" data-id="${agente.id}" data-nombre="${agente.nombre} ${agente.apellido}">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                actionsHtml = `<td></td>`;
+            }
+
             return `
                 <tr>
                     <td>
@@ -453,6 +491,9 @@ class Agentes {
                     </td>
                     <td>${agente.telefono || 'N/A'}</td>
                     <td>
+                        <span class="badge badge-${badgeRol}">${agente.rol || 'N/A'}</span>
+                    </td>
+                    <td>
                         <span class="badge badge-info">${agente.cantidadProspectos || 0}</span>
                     </td>
                     <td>
@@ -461,10 +502,109 @@ class Agentes {
                     <td class="col-hide-mobile">
                         <span class="badge badge-secondary">${agente.equipo || 'Sin equipo'}</span>
                     </td>
+                    ${actionsHtml}
                 </tr>
             `;
         }).join('');
+
+        this.setupActionListeners();
     }
+
+    setupActionListeners() {
+        const tbody = document.getElementById('agentesTableBody');
+        if (!tbody) return;
+
+        // Remove old listeners to avoid duplicates
+        const newTbody = tbody.cloneNode(true);
+        tbody.parentNode.replaceChild(newTbody, tbody);
+
+        newTbody.addEventListener('click', (e) => {
+            const actionItem = e.target.closest('.action-item');
+            if (!actionItem) return;
+
+            const action = actionItem.getAttribute('data-action');
+            const agenteId = actionItem.getAttribute('data-id');
+
+            switch (action) {
+                case 'cambiar-rol':
+                    const rolActual = actionItem.getAttribute('data-rol');
+                    this.abrirModalCambiarRol(agenteId, rolActual);
+                    break;
+                case 'eliminar-agente':
+                    const nombreAgente = actionItem.getAttribute('data-nombre');
+                    this.confirmarEliminarAgente(agenteId, nombreAgente);
+                    break;
+            }
+
+            const dropdown = actionItem.closest('.actions-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        });
+    }
+
+    async abrirModalCambiarRol(agenteId, rolActual) {
+        const { value: nuevoRol } = await Swal.fire({
+            title: 'Cambiar Rol',
+            input: 'select',
+            inputOptions: {
+                'Agente': 'Agente',
+                'Admin': 'Admin'
+            },
+            inputValue: rolActual,
+            showCancelButton: true,
+            confirmButtonText: 'Guardar Cambios',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        });
+
+        if (nuevoRol && nuevoRol !== rolActual) {
+            this.cambiarRolAgente(agenteId, nuevoRol);
+        }
+    }
+
+    async cambiarRolAgente(agenteId, nuevoRol) {
+        try {
+            UI.showLoading();
+            await this.app.api.put(\`/usuarios/\${agenteId}\`, { rol: nuevoRol });
+            UI.hideLoading();
+            UI.showAlert('Rol actualizado exitosamente', 'success');
+            await this.loadData();
+            this.renderTable();
+        } catch (error) {
+            console.error('Error al cambiar rol:', error);
+            UI.hideLoading();
+            UI.showAlert(error.message || 'Error al cambiar rol', 'error');
+        }
+    }
+
+    async confirmarEliminarAgente(agenteId, nombreAgente) {
+        const result = await Swal.fire({
+            title: '¿Eliminar agente?',
+            html: \`¿Estás seguro de que deseas eliminar a <b>\${nombreAgente}</b>?<br><br><small>Esta acción lo ocultará del sistema pero mantendrá sus registros históricos intactos.</small>\`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash-alt"></i> Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                UI.showLoading();
+                await this.app.api.delete(\`/usuarios/\${agenteId}\`);
+                UI.hideLoading();
+                UI.showAlert('Agente eliminado exitosamente', 'success');
+                await this.loadData();
+                this.renderTable();
+            } catch (error) {
+                console.error('Error al eliminar agente:', error);
+                UI.hideLoading();
+                UI.showAlert(error.message || 'Error al eliminar agente', 'error');
+            }
+        }
 
     clearFilters() {
         this.filtros = {
@@ -491,6 +631,7 @@ class Agentes {
         const data = datosFiltrados.map(agente => [
             `${agente.nombre} ${agente.apellido}`,
             agente.telefono || 'N/A',
+            agente.rol || 'N/A',
             agente.cantidadProspectos || 0,
             agente.cantidadContratos || 0,
             agente.equipo || 'Sin equipo'
@@ -537,7 +678,7 @@ class Agentes {
         }
 
         doc.autoTable({
-            head: [["Nombre", "Teléfono", "Prospectos", "Contratos", "Equipo"]],
+            head: [["Nombre", "Teléfono", "Rol", "Prospectos", "Contratos", "Equipo"]],
             body: data,
             startY: filtrosTexto.length > 0 ? 38 : 35,
             styles: { fontSize: 8 }
