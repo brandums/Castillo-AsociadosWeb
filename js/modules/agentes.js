@@ -567,7 +567,7 @@ class Agentes {
     async cambiarRolAgente(agenteId, nuevoRol) {
         try {
             UI.showLoading();
-            await this.app.api.put(\`/usuarios/\${agenteId}\`, { rol: nuevoRol });
+            await this.app.api.put(`/usuarios/${agenteId}`, { rol: nuevoRol });
             UI.hideLoading();
             UI.showAlert('Rol actualizado exitosamente', 'success');
             await this.loadData();
@@ -582,7 +582,7 @@ class Agentes {
     async confirmarEliminarAgente(agenteId, nombreAgente) {
         const result = await Swal.fire({
             title: '¿Eliminar agente?',
-            html: \`¿Estás seguro de que deseas eliminar a <b>\${nombreAgente}</b>?<br><br><small>Esta acción lo ocultará del sistema pero mantendrá sus registros históricos intactos.</small>\`,
+            html: `¿Estás seguro de que deseas eliminar a <b>${nombreAgente}</b>?<br><br><small>Esta acción lo ocultará del sistema pero mantendrá sus registros históricos intactos.</small>`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -594,7 +594,7 @@ class Agentes {
         if (result.isConfirmed) {
             try {
                 UI.showLoading();
-                await this.app.api.delete(\`/usuarios/\${agenteId}\`);
+                await this.app.api.delete(`/usuarios/${agenteId}`);
                 UI.hideLoading();
                 UI.showAlert('Agente eliminado exitosamente', 'success');
                 await this.loadData();
@@ -605,6 +605,7 @@ class Agentes {
                 UI.showAlert(error.message || 'Error al eliminar agente', 'error');
             }
         }
+    }
 
     clearFilters() {
         this.filtros = {

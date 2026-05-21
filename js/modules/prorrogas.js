@@ -678,7 +678,7 @@ class Prorrogas {
             UI.showLoading();
 
             await this.app.api.put(`/prorrogas/${prorrogaId}`, {
-                estado: accion,
+                aprobado: accion === 'aprobado',
                 diasExtra: accion === 'aprobado' ? parseInt(diasExtra) : undefined,
                 comentario: comentario || undefined
             });
@@ -1094,7 +1094,7 @@ class Prorrogas {
             
             const promises = Array.from(this.selectedProrrogas).map(prorrogaId => {
                 return this.app.api.put(`/prorrogas/${prorrogaId}`, {
-                    estado: this.currentBulkAction === 'aprobar' ? 'aprobado' : 'rechazado',
+                    aprobado: this.currentBulkAction === 'aprobar',
                     diasExtra: this.currentBulkAction === 'aprobar' ? parseInt(diasExtra) : undefined,
                     comentario: comentario || undefined
                 });
