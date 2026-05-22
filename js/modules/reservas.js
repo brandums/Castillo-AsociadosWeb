@@ -1374,10 +1374,14 @@ class Reservas {
     configurarOpcionesAmpliar() {
         const opciones = document.querySelectorAll('.ampliar-option');
         
+        // Clonar cada opción para eliminar listeners previos y evitar duplicados
         opciones.forEach(opcion => {
-            opcion.addEventListener('click', () => {
-                const dias = opcion.getAttribute('data-dias');
-                const reservaId = document.getElementById('ampliarReservaId').value;
+            const nuevaOpcion = opcion.cloneNode(true);
+            opcion.parentNode.replaceChild(nuevaOpcion, opcion);
+            
+            nuevaOpcion.addEventListener('click', () => {
+                const dias = nuevaOpcion.getAttribute('data-dias');
+                const reservaId = parseInt(document.getElementById('ampliarReservaId').value, 10);
                 
                 UI.closeModal('modalAmpliarReserva');
 
