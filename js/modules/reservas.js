@@ -470,7 +470,7 @@ class Reservas {
 
     cargarOpcionesEnModal() {
         const proyectos = this.app.getProyectos();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         // Proyectos
         const selectProyecto = document.getElementById('filtroProyectoReservas');
@@ -542,7 +542,7 @@ class Reservas {
         
         const filtrosActivos = [];
         const proyectos = this.app.getProyectos();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         if (this.filtros.fechaInicio || this.filtros.fechaFin) {
             const textoFecha = this.filtros.fechaInicio && this.filtros.fechaFin 
@@ -654,7 +654,7 @@ class Reservas {
         if (this.filtros.search) {
             datosFiltrados = datosFiltrados.filter(reserva => {
                 const proyectos = this.app.getProyectos();
-                const agentes = this.app.getAgentes();
+                const agentes = this.app.getTodosLosAgentes();
                 const clientes = this.allProspectos;
                 
                 // Buscar información relacionada
@@ -783,7 +783,7 @@ class Reservas {
 
         tbody.innerHTML = paginado.datos.map((reserva) => {
             const proyectos = this.app.getProyectos();
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const clientes = this.allProspectos;
             
             // Buscar información relacionada
@@ -1006,7 +1006,7 @@ class Reservas {
             
             // Obtener información relacionada
             const proyectos = this.app.getProyectos();
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const clientes = this.allProspectos;
             
             const proyecto = proyectos.find(p => p.id.toString() === reserva.proyectoId.toString());
@@ -2023,7 +2023,7 @@ class Reservas {
         // Preparar datos para exportación
         const data = datosFiltrados.map(reserva => {
             const proyectos = this.app.getProyectos();
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const clientes = this.allProspectos;
             
             // Buscar información relacionada
@@ -2077,7 +2077,7 @@ class Reservas {
             filtrosTexto.push(`Proyecto: ${proyecto ? proyecto.nombre : 'N/A'}`);
         }
         if (this.filtros.agente !== 'todos') {
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const agente = agentes.find(a => a.id.toString() === this.filtros.agente.toString());
             filtrosTexto.push(`Agente: ${agente ? `${agente.nombre} ${agente.apellido}` : 'N/A'}`);
         }

@@ -66,7 +66,7 @@ class Contratos {
 
     procesarContratos() {
         const proyectos = this.app.getProyectos();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const equipos = this.app.getEquipos();
         const clientes = this.app.getProspectos();
 
@@ -238,7 +238,7 @@ class Contratos {
 
     cargarOpcionesEnModal() {
         const proyectos = this.app.getProyectos();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const equipos = this.app.getEquipos();
 
         // Proyectos
@@ -329,7 +329,7 @@ class Contratos {
         
         const filtrosActivos = [];
         const proyectos = this.app.getProyectos();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const equipos = this.app.getEquipos();
 
         if (this.filtros.fechaInicio || this.filtros.fechaFin) {
@@ -863,7 +863,7 @@ class Contratos {
             filtrosTexto.push(`Equipo: ${equipo ? equipo.nombre : 'N/A'}`);
         }
         if (this.filtros.asesor !== 'todos') {
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const agente = agentes.find(a => a.id === this.filtros.asesor);
             filtrosTexto.push(`Asesor: ${agente ? `${agente.nombre} ${agente.apellido}` : 'N/A'}`);
         }

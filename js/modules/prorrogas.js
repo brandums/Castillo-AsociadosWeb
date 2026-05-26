@@ -70,7 +70,7 @@ class Prorrogas {
     }
 
     procesarDatos() {
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const prospectos = this.app.getProspectos();
         
         this.datos = this.prorrogasOriginales.map(prorroga => {
@@ -709,7 +709,7 @@ class Prorrogas {
     }
 
     cargarOpcionesEnModal() {
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         // Agentes
         const selectAsesor = document.getElementById('filtroAsesorProrrogas');
@@ -762,7 +762,7 @@ class Prorrogas {
         if (!container || !content) return;
         
         const filtrosActivos = [];
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         if (this.filtros.fechaInicio || this.filtros.fechaFin) {
             const textoFecha = this.filtros.fechaInicio && this.filtros.fechaFin 
@@ -905,7 +905,7 @@ class Prorrogas {
             filtrosTexto.push(`Estado: ${this.filtros.estado}`);
         }
         if (this.filtros.asesor !== 'todos') {
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             const agente = agentes.find(a => a.id === this.filtros.asesor);
             filtrosTexto.push(`Asesor: ${agente ? `${agente.nombre} ${agente.apellido}` : 'N/A'}`);
         }

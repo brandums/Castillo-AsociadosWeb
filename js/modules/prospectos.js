@@ -61,7 +61,7 @@ class Prospectos {
     }
 
     async loadUsuariosParaFiltros() {
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const selectAsesor = document.getElementById('filtroAsesor');
             
         if (selectAsesor) {
@@ -236,7 +236,7 @@ class Prospectos {
     }
 
     cargarAsesoresEnModal() {
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const selectAsesor = document.getElementById('filtroAsesor');
         
         if (selectAsesor) {
@@ -296,7 +296,7 @@ class Prospectos {
         if (!container || !content) return;
         
         const filtrosActivos = [];
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         if (this.filtros.fechaInicio || this.filtros.fechaFin) {
             const textoFecha = this.filtros.fechaInicio && this.filtros.fechaFin 
@@ -459,7 +459,7 @@ class Prospectos {
         if (!tbody || !table) return;
 
         let datosFiltrados = this.aplicarFiltros();
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         if (this.ordenDescendente) {
             datosFiltrados = [...datosFiltrados].reverse();
@@ -949,7 +949,7 @@ class Prospectos {
         const prospecto = this.datos.find(p => p.id === prospectoId);
         if (!prospecto) return;
 
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const agente = agentes.find(u => u.id === prospecto.agenteId);
         const estadoInfo = this.calcularEstadoProspecto(prospecto.fecha);
         const badgeClass = Utils.getBadgeClass(estadoInfo.estado);
@@ -999,7 +999,7 @@ class Prospectos {
             return;
         }
 
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         const data = datosFiltrados.map(prospecto => {
             const agente = agentes.find(u => u.id === prospecto.agenteId);

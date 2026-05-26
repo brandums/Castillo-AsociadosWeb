@@ -108,8 +108,12 @@ class App {
     }
 
     // MÉTODOS PARA ACCEDER A DATOS GLOBALES
-    getAgentes() {
+    getTodosLosAgentes() {
         return this.globalData.usuarios;
+    }
+
+    getAgentes() {
+        return this.globalData.usuarios.filter(u => !u.eliminado);
     }
 
     getProyectos() {

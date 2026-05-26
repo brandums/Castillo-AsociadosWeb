@@ -63,7 +63,7 @@ class Equipos {
     // MÉTODO CORREGIDO: Obtener nombres de miembros
     obtenerNombresMiembros(equipo) {
         const miembrosArray = this.obtenerMiembrosArray(equipo);
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         
         return miembrosArray.map(miembroId => {
             const agente = agentes.find(a => a.id === miembroId);
@@ -212,7 +212,7 @@ class Equipos {
     actualizarMiembrosSeleccionados() {
         const checkboxes = document.querySelectorAll('.agente-checkbox:checked');
         const miembrosContainer = document.getElementById('equipoMiembros');
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
 
         miembrosContainer.innerHTML = Array.from(checkboxes).map(checkbox => {
             const agenteId = checkbox.value;
@@ -283,7 +283,7 @@ class Equipos {
 
         if (this.filtros.search) {
             const searchTerm = this.filtros.search.toLowerCase();
-            const agentes = this.app.getAgentes();
+            const agentes = this.app.getTodosLosAgentes();
             
             // Pre-cachear búsqueda de agentes para mejor performance
             const agentesMap = new Map();
@@ -451,7 +451,7 @@ class Equipos {
             return;
         }
 
-        const agentes = this.app.getAgentes();
+        const agentes = this.app.getTodosLosAgentes();
         const miembrosArray = this.obtenerMiembrosArray(equipo);
         
         const miembrosNombres = miembrosArray.map(miembroId => {
