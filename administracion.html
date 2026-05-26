@@ -487,7 +487,7 @@
                                     <th class="col-hide-mobile">Método Pago</th>
                                     <th>Monto</th>
                                     <th class="col-hide-mobile">Fecha Firma</th>
-                                    <th style="display: none;" class="col-hide-mobile">Estado</th>
+                                    <th class="col-hide-mobile">Estado</th>
                                     <th>Acción</th>
                                 </tr>
                             </thead>
@@ -968,6 +968,30 @@
                     <div class="form-group">
                         <label for="registrarMonto">Monto (Bs) *</label>
                         <input type="number" id="registrarMonto" class="form-control" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registrarPrecioLote">Precio del Lote ($) *</label>
+                        <input type="number" id="registrarPrecioLote" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registrarCuotaInicial">Cuota inicial ($) *</label>
+                        <input type="number" id="registrarCuotaInicial" class="form-control" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registrarTiempoFinanciamiento">Tiempo de financiamiento *</label>
+                        <input type="number" id="registrarTiempoFinanciamiento" class="form-control" step="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registrarFechaPago">Fecha de pago *</label>
+                        <select id="registrarFechaPago" class="form-control" required>
+                            <option value="10-15">Del 10 al 15 de cada mes</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -1493,8 +1517,28 @@
                                 <span class="detail-value" id="detalleMonto">-</span>
                             </div>
                             <div class="detail-item">
-                                <strong class="detail-label">Estado:</strong>
+                                <strong class="detail-label">Precio Lote:</strong>
+                                <span class="detail-value" id="detallePrecioLote">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Cuota Inicial:</strong>
+                                <span class="detail-value" id="detalleCuotaInicial">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Financiamiento:</strong>
+                                <span class="detail-value" id="detalleFinanciamiento">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Fecha de Pago:</strong>
+                                <span class="detail-value" id="detalleFechaPago">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Estado Contrato:</strong>
                                 <span class="detail-value" id="detalleEstado">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Amurallado:</strong>
+                                <span class="detail-value" id="detalleAmurallado">-</span>
                             </div>
                         </div>
                     </div>

@@ -174,11 +174,42 @@ class ApiService {
         });
     }
 
-    async firmarReserva(reservaId, metodoPago, monto) {
+    async firmarReserva(reservaId, metodoPago, monto, datosPlanPagos = {}) {
         return this.put(`/reservas/${reservaId}/firmar`, {
             metodoPago,
-            monto
+            monto,
+            ...datosPlanPagos
         });
+    }
+
+    async descargarPlanPagosContrato(contratoId) {
+        const endpoint = `/contratos/${contratoId}/plan-pagos`;
+        const url = `${this.BASE_URL}${endpoint}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: this.auth.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const filenameMatch = disposition.match(/filename\\*=UTF-8''([^;]+)|filename="?([^"]+)"?/i);
+        const filename = filenameMatch
+            ? decodeURIComponent(filenameMatch[1] || filenameMatch[2])
+            : `plan_pagos_contrato_${contratoId}.xlsx`;
+
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
     }
 
     async ampliarReserva(reservaId, dias) {
@@ -207,6 +238,10 @@ class ApiService {
             metodoPago,
             monto
         });
+    }
+
+    async darDeBajaContrato(contratoId) {
+        return this.put(`/contratos/${contratoId}/baja`, {});
     }
 
     async actualizarProrroga(prorrogaId, datos) {

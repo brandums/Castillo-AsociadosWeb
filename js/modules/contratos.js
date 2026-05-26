@@ -53,7 +53,7 @@ class Contratos {
     async loadData() {
         try {
             UI.showLoading(document.getElementById('contratosTab'));
-            await this.app.refreshGlobalData("estadisticas-contratos");
+            await this.app.refreshGlobalData("contratos");
             this.contratosOriginales = this.app.getContratos();
             this.procesarContratos();
             UI.hideLoading(document.getElementById('contratosTab'));
@@ -89,8 +89,15 @@ class Contratos {
                 equipoId: contrato.equipoId,
                 equipo: equipoObj ? equipoObj.nombre : 'Sin equipo',
                 tipo: contrato.tipo || 'N/A',
+                estado: contrato.estado || 'Vigente',
                 metodoPago: contrato.metodoPago || 'N/A',
                 monto: contrato.monto || 0,
+                precioLote: contrato.precioLote,
+                cuotaInicial: contrato.cuotaInicial,
+                tiempoFinanciamiento: contrato.tiempoFinanciamiento,
+                fechaPagoInicio: contrato.fechaPagoInicio,
+                fechaPagoFin: contrato.fechaPagoFin,
+                tienePlanPagos: contrato.tienePlanPagos || false,
                 fechaFirma: Utils.formatDate(contrato.fechaFirma), // Para mostrar
                 fechaFirmaOriginal: contrato.fechaFirma, // Para filtrar
                 amurallado: contrato.Amurallado || false
@@ -547,9 +554,7 @@ class Contratos {
             const montoFormateado = contrato.monto !== null && contrato.monto !== undefined ? `Bs ${parseFloat(contrato.monto).toLocaleString('es-BO')}` : 'N/A';
             // Usar la fecha formateada para mostrar
             const fechaFirma = contrato.fechaFirma;
-            const amuralladoBadge = contrato.amurallado ? 
-                '<span class="badge badge-success">Amurallado</span>' : 
-                '<span class="badge badge-warning">No Amurallado</span>';
+            const estadoBadge = `<span class="badge badge-${this.getEstadoBadgeClass(contrato.estado)}">${this.getEstadoTexto(contrato.estado)}</span>`;
 
             // Determinar la clase CSS según el tipo
             let tipoClass = '';
@@ -582,7 +587,7 @@ class Contratos {
                     <td class="col-hide-mobile">${contrato.metodoPago}</td>
                     <td>${montoFormateado}</td>
                     <td class="col-hide-mobile">${fechaFirma}</td>
-                    <td style="display:none;" class="col-hide-mobile">${amuralladoBadge}</td>
+                    <td class="col-hide-mobile">${estadoBadge}</td>
                     <td class="actions-column">
                         <div class="actions-dropdown">
                             <button class="actions-toggle">
@@ -593,6 +598,18 @@ class Contratos {
                                     <i class="fas fa-eye"></i>
                                     Ver Detalles
                                 </button>
+                                ${contrato.tienePlanPagos ? `
+                                <button class="action-item" data-action="descargar-plan" data-id="${contrato.id}">
+                                    <i class="fas fa-file-excel"></i>
+                                    Descargar plan de pagos
+                                </button>
+                                ` : ''}
+                                ${this.isAdmin() && contrato.estado !== 'Baja' ? `
+                                <button class="action-item" data-action="dar-baja" data-id="${contrato.id}">
+                                    <i class="fas fa-ban"></i>
+                                    Dar de baja
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
                     </td>
@@ -601,6 +618,22 @@ class Contratos {
         }).join('');
 
         this.setupActionListeners();
+    }
+
+    getEstadoBadgeClass(estado) {
+        const clases = {
+            Vigente: 'success',
+            Baja: 'danger'
+        };
+        return clases[estado] || 'secondary';
+    }
+
+    getEstadoTexto(estado) {
+        const textos = {
+            Vigente: 'Vigente',
+            Baja: 'Baja'
+        };
+        return textos[estado] || estado || 'Vigente';
     }
 
 
@@ -620,6 +653,8 @@ class Contratos {
     setupActionListeners() {
         const tbody = document.getElementById('contratosTableBody');
         if (!tbody) return;
+        if (tbody.contratosActionsListenerSetup) return;
+        tbody.contratosActionsListenerSetup = true;
 
         tbody.addEventListener('click', (e) => {
             const actionItem = e.target.closest('.action-item');
@@ -632,6 +667,12 @@ class Contratos {
                 case 'ver-detalles':
                     this.verDetallesContrato(contratoId);
                     break;
+                case 'dar-baja':
+                    this.darDeBajaContrato(contratoId);
+                    break;
+                case 'descargar-plan':
+                    this.descargarPlanPagos(contratoId);
+                    break;
             }
 
             const dropdown = actionItem.closest('.actions-dropdown');
@@ -639,6 +680,76 @@ class Contratos {
                 dropdown.classList.remove('show');
             }
         });
+    }
+
+    darDeBajaContrato(contratoId) {
+        const contrato = this.datos.find(c => c.id === contratoId);
+        if (!contrato) {
+            UI.showAlert('Contrato no encontrado', 'error');
+            return;
+        }
+
+        if (!this.isAdmin()) {
+            UI.showAlert('Solo los administradores pueden dar de baja contratos', 'warning');
+            return;
+        }
+
+        if (contrato.estado === 'Baja') {
+            UI.showAlert('Este contrato ya fue dado de baja', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Dar de baja contrato',
+            html: `
+                <div class="swal-content">
+                    <p>Esta accion cambiara el contrato de <strong>${contrato.cliente}</strong> a estado <strong>Baja</strong>.</p>
+                    <p>El lote <strong>Mz: ${contrato.manzano}, Lt: ${contrato.nroTerreno}</strong> quedara disponible para una nueva reserva.</p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Dar de baja',
+            cancelButtonText: 'Cancelar',
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    return await this.app.api.darDeBajaContrato(contratoId);
+                } catch (error) {
+                    Swal.showValidationMessage(error.message || 'Error al dar de baja el contrato');
+                    return false;
+                }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then(async (result) => {
+            if (!result.isConfirmed) return;
+
+            UI.showAlert('Contrato dado de baja exitosamente', 'success');
+            await this.loadData();
+            await this.renderTable();
+        });
+    }
+
+    async descargarPlanPagos(contratoId) {
+        const contrato = this.datos.find(c => c.id === contratoId);
+        if (!contrato) {
+            UI.showAlert('Contrato no encontrado', 'error');
+            return;
+        }
+
+        if (!contrato.tienePlanPagos) {
+            UI.showAlert('Este contrato no tiene datos de plan de pagos registrados', 'warning');
+            return;
+        }
+
+        try {
+            await this.app.api.descargarPlanPagosContrato(contratoId);
+        } catch (error) {
+            console.error('Error descargando plan de pagos:', error);
+            UI.showAlert(error.message || 'Error al descargar el plan de pagos', 'error');
+        }
     }
 
     verDetallesContrato(contratoId) {
@@ -651,7 +762,6 @@ class Contratos {
         const montoFormateado = contrato.monto ? `Bs ${parseFloat(contrato.monto).toLocaleString('es-BO')}` : 'N/A';
         // Usar la fecha formateada para mostrar
         const fechaFirma = contrato.fechaFirma;
-        const amuralladoTexto = contrato.amurallado ? 'Amurallado' : 'No Amurallado';
 
         // Determinar color del tipo
         const tipoColor = contrato.tipo === 'Terreno' ? 'text-success' : contrato.tipo === 'Muralla' ? 'text-danger' : 'text-muted';
@@ -667,9 +777,18 @@ class Contratos {
         document.getElementById('detalleFechaFirma').textContent = fechaFirma;
         document.getElementById('detalleMetodoPago').textContent = contrato.metodoPago;
         document.getElementById('detalleMonto').textContent = montoFormateado;
-        document.getElementById('detalleEstado').innerHTML = contrato.amurallado ? 
-            '<span class="badge badge-success">Amurallado</span>' : 
-            '<span class="badge badge-warning">No Amurallado</span>';
+        document.getElementById('detallePrecioLote').textContent = contrato.precioLote ? `$ ${parseFloat(contrato.precioLote).toLocaleString('es-BO')}` : 'No registrado';
+        document.getElementById('detalleCuotaInicial').textContent = contrato.cuotaInicial ? `$ ${parseFloat(contrato.cuotaInicial).toLocaleString('es-BO')}` : 'No registrado';
+        document.getElementById('detalleFinanciamiento').textContent = contrato.tiempoFinanciamiento ? `${contrato.tiempoFinanciamiento} meses` : 'No registrado';
+        document.getElementById('detalleFechaPago').textContent = contrato.fechaPagoInicio && contrato.fechaPagoFin ? `Del ${contrato.fechaPagoInicio} al ${contrato.fechaPagoFin} de cada mes` : 'No registrado';
+        document.getElementById('detalleEstado').innerHTML = `<span class="badge badge-${this.getEstadoBadgeClass(contrato.estado)}">${this.getEstadoTexto(contrato.estado)}</span>`;
+
+        const detalleAmurallado = document.getElementById('detalleAmurallado');
+        if (detalleAmurallado) {
+            detalleAmurallado.innerHTML = contrato.amurallado ? 
+                '<span class="badge badge-success">Amurallado</span>' : 
+                '<span class="badge badge-warning">No Amurallado</span>';
+        }
 
         // Mostrar el modal
         UI.showModal('modalDetallesContrato');
@@ -718,6 +837,7 @@ class Contratos {
                 contrato.asesor,
                 contrato.equipo,
                 contrato.tipo,
+                this.getEstadoTexto(contrato.estado),
                 contrato.metodoPago,
                 montoFormateado,
                 amurallado,
@@ -789,7 +909,7 @@ class Contratos {
         }
 
         doc.autoTable({
-            head: [["Proyecto", "Lote", "Cliente", "Asesor", "Equipo", "Tipo", "Método Pago", "Monto", "Amurallado", "Fecha Firma"]],
+            head: [["Proyecto", "Lote", "Cliente", "Asesor", "Equipo", "Tipo", "Estado", "Método Pago", "Monto", "Amurallado", "Fecha Firma"]],
             body: data,
             startY: filtrosTexto.length > 0 ? 38 : 35,
             styles: { fontSize: 7 }

@@ -77,8 +77,10 @@ class Dashboard {
                 this.app.api.loadUsers()
             ]);
 
+            const contratosVigentes = contratos?.filter(c => c.estado !== 'Baja') || [];
+
             // Calcular datos manualmente
-            await this.calculateTrends(prospectos, clientes, reservas, contratos);
+            await this.calculateTrends(prospectos, clientes, reservas, contratosVigentes);
 
             const reservasActivas = reservas?.filter(r => 
                 r.estado === 'Activa' || r.estado === 'activa' || 
@@ -90,15 +92,15 @@ class Dashboard {
                 totalProspectos: prospectos?.length || 0,
                 totalClientes: clientes?.length || 0,
                 totalReservas: reservasActivas,
-                totalContratos: contratos?.length || 0
+                totalContratos: contratosVigentes.length
             };
 
             // Crear estructura de datos simulada para gráficos
             this.dashboardData = {
                 estadisticas: this.stats,
-                graficos: await this.calculateChartsFallback(prospectos, reservas, contratos),
-                rendimientoAgentes: await this.calculatePerformanceFallback(usuarios, prospectos, contratos),
-                actividadReciente: await this.calculateActivityFallback(reservas, contratos)
+                graficos: await this.calculateChartsFallback(prospectos, reservas, contratosVigentes),
+                rendimientoAgentes: await this.calculatePerformanceFallback(usuarios, prospectos, contratosVigentes),
+                actividadReciente: await this.calculateActivityFallback(reservas, contratosVigentes)
             };
 
         } catch (fallbackError) {

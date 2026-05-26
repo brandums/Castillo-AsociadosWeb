@@ -1300,6 +1300,15 @@ class Reservas {
             `;
             
             UI.showAlert(mensaje, 'success');
+
+            if (resultado?.contratoId) {
+                try {
+                    await this.app.api.descargarPlanPagosContrato(resultado.contratoId);
+                } catch (downloadError) {
+                    console.error('Error descargando plan de pagos:', downloadError);
+                    UI.showAlert('Contrato firmado, pero no se pudo descargar el plan de pagos', 'warning');
+                }
+            }
             
             return true;
         } catch (error) {
@@ -1643,6 +1652,37 @@ class Reservas {
                         >
                     </div>
                     
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Precio del Lote ($):</label>
+                            <input type="number" id="precioLoteFirma" min="0" step="0.01"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+                                placeholder="Ej. 6990">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Cuota inicial ($):</label>
+                            <input type="number" id="cuotaInicialFirma" min="0" step="0.01"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+                                placeholder="Ej. 2155.17">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Tiempo de financiamiento:</label>
+                            <input type="number" id="tiempoFinanciamientoFirma" min="1" step="1"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+                                placeholder="Meses">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Fecha de pago:</label>
+                            <select id="fechaPagoFirma"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                                <option value="10-15">Del 10 al 15 de cada mes</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <p style="color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; margin-top: 15px;">
                         <i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.
                     </p>
@@ -1663,6 +1703,15 @@ class Reservas {
                 const metodoPago = document.getElementById('metodoPagoFirma')?.value;
                 const montoStr = document.getElementById('montoFirma')?.value;
                 const monto = parseFloat(montoStr);
+                const precioLoteStr = document.getElementById('precioLoteFirma')?.value;
+                const cuotaInicialStr = document.getElementById('cuotaInicialFirma')?.value;
+                const tiempoFinanciamientoStr = document.getElementById('tiempoFinanciamientoFirma')?.value;
+                const precioLote = parseFloat(precioLoteStr);
+                const cuotaInicial = parseFloat(cuotaInicialStr);
+                const tiempoFinanciamiento = parseInt(tiempoFinanciamientoStr, 10);
+                const [fechaPagoInicio, fechaPagoFin] = (document.getElementById('fechaPagoFirma')?.value || '10-15')
+                    .split('-')
+                    .map(value => parseInt(value, 10));
 
                 // Validaciones
                 if (!metodoPago) {
@@ -1675,14 +1724,37 @@ class Reservas {
                     return false;
                 }
 
+                if (!precioLoteStr || isNaN(precioLote) || precioLote <= 0) {
+                    Swal.showValidationMessage('Por favor, ingresa un precio de lote valido mayor a 0.');
+                    return false;
+                }
+
+                if (!cuotaInicialStr || isNaN(cuotaInicial) || cuotaInicial < 0 || cuotaInicial >= precioLote) {
+                    Swal.showValidationMessage('La cuota inicial debe ser mayor o igual a 0 y menor al precio del lote.');
+                    return false;
+                }
+
+                if (!tiempoFinanciamientoStr || isNaN(tiempoFinanciamiento) || tiempoFinanciamiento <= 0) {
+                    Swal.showValidationMessage('Por favor, ingresa un tiempo de financiamiento valido.');
+                    return false;
+                }
+
                 // Retornar valores al then()
-                return { metodoPago, monto };
+                return {
+                    metodoPago,
+                    monto,
+                    precioLote,
+                    cuotaInicial,
+                    tiempoFinanciamiento,
+                    fechaPagoInicio,
+                    fechaPagoFin
+                };
             },
 
             didOpen: () => {
                 // Asegurar que los inputs tengan el ancho correcto
                 setTimeout(() => {
-                    const inputs = document.querySelectorAll('#metodoPagoFirma, #montoFirma');
+                    const inputs = document.querySelectorAll('#metodoPagoFirma, #montoFirma, #precioLoteFirma, #cuotaInicialFirma, #tiempoFinanciamientoFirma, #fechaPagoFirma');
                     inputs.forEach(input => {
                         input.style.width = '100%';
                     });
@@ -1693,10 +1765,16 @@ class Reservas {
             }
         }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const { metodoPago, monto } = result.value;
+                    const { metodoPago, monto, precioLote, cuotaInicial, tiempoFinanciamiento, fechaPagoInicio, fechaPagoFin } = result.value;
                     
                     try {
-                        await this.procesarFirma(reservaId, metodoPago, monto);
+                        await this.procesarFirma(reservaId, metodoPago, monto, {
+                            precioLote,
+                            cuotaInicial,
+                            tiempoFinanciamiento,
+                            fechaPagoInicio,
+                            fechaPagoFin
+                        });
                     } catch (error) {
                         console.error('Error en la firma:', error);
                     }
@@ -1713,10 +1791,10 @@ class Reservas {
         }
     }
 
-    async procesarFirma(reservaId, metodoPago, monto) {
+    async procesarFirma(reservaId, metodoPago, monto, datosPlanPagos) {
         try {            
             // Llamar a la API real con método de pago y monto
-            const resultado = await this.app.api.firmarReserva(reservaId, metodoPago, monto);
+            const resultado = await this.app.api.firmarReserva(reservaId, metodoPago, monto, datosPlanPagos);
             
             // ACTUALIZAR DATOS LOCALES Y TABLA
             await this.refreshData();

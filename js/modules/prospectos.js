@@ -763,6 +763,10 @@ class Prospectos {
         document.getElementById('registrarManzano').value = '';
         document.getElementById('registrarMetodoPago').value = '';
         document.getElementById('registrarMonto').value = '';
+        document.getElementById('registrarPrecioLote').value = '';
+        document.getElementById('registrarCuotaInicial').value = '';
+        document.getElementById('registrarTiempoFinanciamiento').value = '';
+        document.getElementById('registrarFechaPago').value = '10-15';
         
         UI.showModal('modalRegistrar');
     }
@@ -791,10 +795,35 @@ class Prospectos {
         const fechaFirma = document.getElementById('registrarFechaFirma').value;
         const metodoPago = document.getElementById('registrarMetodoPago').value;
         const monto = document.getElementById('registrarMonto').value;
+        const precioLote = document.getElementById('registrarPrecioLote').value;
+        const cuotaInicial = document.getElementById('registrarCuotaInicial').value;
+        const tiempoFinanciamiento = document.getElementById('registrarTiempoFinanciamiento').value;
+        const [fechaPagoInicio, fechaPagoFin] = document.getElementById('registrarFechaPago').value
+            .split('-')
+            .map(value => parseInt(value, 10));
         const button = document.getElementById('btnGuardarRegistro');
 
-        if (!proyectoId || !lote || !manzano || !fechaFirma || !metodoPago || !monto) {
+        if (!proyectoId || !lote || !manzano || !fechaFirma || !metodoPago || !monto || !precioLote || !cuotaInicial || !tiempoFinanciamiento) {
             UI.showAlert('Por favor complete todos los campos obligatorios', 'warning');
+            return;
+        }
+
+        const precioLoteNumber = parseFloat(precioLote);
+        const cuotaInicialNumber = parseFloat(cuotaInicial);
+        const tiempoFinanciamientoNumber = parseInt(tiempoFinanciamiento, 10);
+
+        if (isNaN(precioLoteNumber) || precioLoteNumber <= 0) {
+            UI.showAlert('El precio del lote debe ser mayor a 0', 'warning');
+            return;
+        }
+
+        if (isNaN(cuotaInicialNumber) || cuotaInicialNumber < 0 || cuotaInicialNumber >= precioLoteNumber) {
+            UI.showAlert('La cuota inicial debe ser mayor o igual a 0 y menor al precio del lote', 'warning');
+            return;
+        }
+
+        if (isNaN(tiempoFinanciamientoNumber) || tiempoFinanciamientoNumber <= 0) {
+            UI.showAlert('El tiempo de financiamiento debe ser mayor a 0', 'warning');
             return;
         }
 
@@ -807,10 +836,23 @@ class Prospectos {
                 manzano,
                 fechaFirma,
                 metodoPago,
-                monto: parseFloat(monto)
+                monto: parseFloat(monto),
+                precioLote: precioLoteNumber,
+                cuotaInicial: cuotaInicialNumber,
+                tiempoFinanciamiento: tiempoFinanciamientoNumber,
+                fechaPagoInicio,
+                fechaPagoFin
             });
 
             UI.showAlert(result?.message || 'Prospecto registrado como cliente correctamente', 'success');
+            if (result?.contratoId) {
+                try {
+                    await this.app.api.descargarPlanPagosContrato(result.contratoId);
+                } catch (downloadError) {
+                    console.error('Error descargando plan de pagos:', downloadError);
+                    UI.showAlert('Contrato creado, pero no se pudo descargar el plan de pagos', 'warning');
+                }
+            }
             UI.closeModal('modalRegistrar');
 
             await this.loadData();
