@@ -1022,6 +1022,13 @@ class Reservas {
             const metodoPago = reserva.metodoPago || 'No especificado';
             const fechaReserva = reserva.fechaReserva ? new Date(reserva.fechaReserva).toLocaleDateString() : 'No especificada';
             
+            let fechaExpiracion = 'No calculable';
+            if (reserva.fechaReserva && reserva.tiempoEspera) {
+                const f = new Date(reserva.fechaReserva);
+                f.setDate(f.getDate() + reserva.tiempoEspera);
+                fechaExpiracion = f.toLocaleDateString();
+            }
+            
             // Determinar clase del badge según el estado
             const estadoClase = this.getEstadoBadgeClass(reserva.estado);
             const estadoTexto = this.getEstadoTexto(reserva.estado);
@@ -1087,6 +1094,10 @@ class Reservas {
                             <div class="detail-item">
                                 <strong class="detail-label">Tiempo de Espera:</strong>
                                 <span class="detail-value">${tiempoEspera}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Expira el:</strong>
+                                <span class="detail-value text-danger fw-bold">${fechaExpiracion}</span>
                             </div>
                             <div class="detail-item">
                                 <strong class="detail-label">Monto de Reserva:</strong>
