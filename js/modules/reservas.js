@@ -740,6 +740,41 @@ class Reservas {
         return mapeo[estadoApi] || 'activa';
     }
 
+    getFechaReservaTexto(reserva) {
+        return reserva.fechaReserva
+            ? Utils.formatDate(reserva.fechaReserva)
+            : 'No especificada';
+    }
+
+    getHoraRegistroTexto(reserva) {
+        const horaIso = Utils.formatTime(reserva.fechaReservaIso);
+        if (horaIso !== '-') return horaIso;
+
+        const horaReserva = Utils.formatTime(reserva.horaReserva);
+        return horaReserva !== '-' ? horaReserva : 'No especificada';
+    }
+
+    getFechaExpiracionTexto(reserva) {
+        if (reserva.fechaVencimiento) {
+            return Utils.formatDate(reserva.fechaVencimiento);
+        }
+
+        if (reserva.fechaVencimientoIso) {
+            return Utils.formatDate(reserva.fechaVencimientoIso);
+        }
+
+        const fechaCalculada = Utils.addDaysToDate(reserva.fechaReserva, reserva.tiempoEspera);
+        return fechaCalculada ? Utils.formatDate(fechaCalculada) : 'No calculable';
+    }
+
+    getHoraExpiracionTexto(reserva) {
+        const horaIso = Utils.formatTime(reserva.fechaVencimientoIso);
+        if (horaIso !== '-') return horaIso;
+
+        const horaRegistro = this.getHoraRegistroTexto(reserva);
+        return horaRegistro !== 'No especificada' ? horaRegistro : 'No calculable';
+    }
+
     renderTable() {
         const tbody = document.getElementById('reservasTableBody');
         const table = document.getElementById('reservasTable');
@@ -1020,14 +1055,10 @@ class Reservas {
             const montoFormateado = reserva.montoReserva ? `${reserva.montoReserva} Bs.` : 'No especificado';
             const tiempoEspera = reserva.tiempoEspera ? `${reserva.tiempoEspera} días` : 'No especificado';
             const metodoPago = reserva.metodoPago || 'No especificado';
-            const fechaReserva = reserva.fechaReserva ? new Date(reserva.fechaReserva).toLocaleDateString() : 'No especificada';
-            
-            let fechaExpiracion = 'No calculable';
-            if (reserva.fechaReserva && reserva.tiempoEspera) {
-                const f = new Date(reserva.fechaReserva);
-                f.setDate(f.getDate() + reserva.tiempoEspera);
-                fechaExpiracion = f.toLocaleDateString();
-            }
+            const fechaReserva = this.getFechaReservaTexto(reserva);
+            const horaRegistro = this.getHoraRegistroTexto(reserva);
+            const fechaExpiracion = this.getFechaExpiracionTexto(reserva);
+            const horaExpiracion = this.getHoraExpiracionTexto(reserva);
             
             // Determinar clase del badge según el estado
             const estadoClase = this.getEstadoBadgeClass(reserva.estado);
@@ -1089,7 +1120,7 @@ class Reservas {
                             </div>
                             <div class="detail-item">
                                 <strong class="detail-label">Hora de Reserva:</strong>
-                                <span class="detail-value">${reserva.horaReserva}</span>
+                                <span class="detail-value">${horaRegistro}</span>
                             </div>
                             <div class="detail-item">
                                 <strong class="detail-label">Tiempo de Espera:</strong>
@@ -1098,6 +1129,10 @@ class Reservas {
                             <div class="detail-item">
                                 <strong class="detail-label">Expira el:</strong>
                                 <span class="detail-value text-danger fw-bold">${fechaExpiracion}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong class="detail-label">Hora de Expiracion:</strong>
+                                <span class="detail-value text-danger fw-bold">${horaExpiracion}</span>
                             </div>
                             <div class="detail-item">
                                 <strong class="detail-label">Monto de Reserva:</strong>
@@ -2045,8 +2080,8 @@ class Reservas {
             const nombreProyecto = proyecto ? proyecto.nombre : 'No encontrado';
             const nombreAgente = agente ? `${agente.nombre} ${agente.apellido}` : 'No encontrado';
             const nombreCliente = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'No encontrado';
-            const fechaReserva = reserva.fechaReserva ? new Date(reserva.fechaReserva).toLocaleDateString() : 'No especificada';
-            const horaReserva = reserva.horaReserva || 'No especificada';
+            const fechaReserva = this.getFechaReservaTexto(reserva);
+            const horaReserva = this.getHoraRegistroTexto(reserva);
             const estadoTexto = this.getEstadoTexto(reserva.estado);
 
             return [

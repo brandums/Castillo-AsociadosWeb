@@ -57,13 +57,83 @@ class Utils {
         return `<span class="status-badge ${status.class}">${status.text}</span>`;
     }
 
+    static parseLocalDate(dateValue) {
+        if (!dateValue) return null;
+
+        if (dateValue instanceof Date) {
+            return isNaN(dateValue.getTime()) ? null : dateValue;
+        }
+
+        const cleanDate = dateValue.toString().trim();
+
+        const isoDateMatch = cleanDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:T.*)?$/);
+        if (isoDateMatch) {
+            const [, year, month, day] = isoDateMatch;
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        }
+
+        const dashDateMatch = cleanDate.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (dashDateMatch) {
+            const [, day, month, year] = dashDateMatch;
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        }
+
+        const slashDateMatch = cleanDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (slashDateMatch) {
+            const [, day, month, year] = slashDateMatch;
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        }
+
+        const nativeDate = new Date(cleanDate);
+        return isNaN(nativeDate.getTime()) ? null : nativeDate;
+    }
+
+    static addDaysToDate(dateValue, days) {
+        const date = this.parseLocalDate(dateValue);
+        const parsedDays = parseInt(days);
+
+        if (!date || isNaN(parsedDays)) return null;
+
+        const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        result.setDate(result.getDate() + parsedDays);
+        return result;
+    }
+
+    static formatTime(timeValue) {
+        if (!timeValue) return '-';
+
+        const cleanTime = timeValue.toString().trim();
+        const isoMatch = cleanTime.match(/T(\d{2}):(\d{2})/);
+        if (isoMatch) {
+            return `${isoMatch[1]}:${isoMatch[2]}`;
+        }
+
+        const timeMatch = cleanTime.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+        if (timeMatch) {
+            return `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+        }
+
+        const nativeDate = new Date(cleanTime);
+        if (!isNaN(nativeDate.getTime())) {
+            return nativeDate.toLocaleTimeString('es-BO', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        return '-';
+    }
+
     static filtrarPorFechas(datos, fechaInicio, fechaFin, campoFecha = 'fecha') {
         if (!fechaInicio && !fechaFin) return datos;
         
         return datos.filter(item => {
-            const fechaItem = new Date(item[campoFecha]?.split('T')[0]);
-            const desde = fechaInicio ? new Date(fechaInicio) : null;
-            const hasta = fechaFin ? new Date(fechaFin) : null;
+            const fechaItem = this.parseLocalDate(item[campoFecha]);
+            const desde = this.parseLocalDate(fechaInicio);
+            const hasta = this.parseLocalDate(fechaFin);
+
+            if (!fechaItem) return false;
 
             return (!desde || fechaItem >= desde) &&
                    (!hasta || fechaItem <= hasta);
@@ -293,6 +363,9 @@ class Utils {
         if (!dateString) return '-';
         
         try {
+            const parsedDate = this.parseLocalDate(dateString);
+            return parsedDate ? parsedDate.toLocaleDateString('es-ES') : '-';
+
             // Limpiar y normalizar la fecha
             const cleanDate = dateString.toString().trim();
             

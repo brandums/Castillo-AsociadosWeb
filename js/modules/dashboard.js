@@ -139,8 +139,8 @@ class Dashboard {
                             
                             if (!dateStr) return;
                             
-                            const date = new Date(dateStr);
-                            if (isNaN(date.getTime())) return;
+                            const date = Utils.parseLocalDate(dateStr);
+                            if (!date) return;
 
                             const itemMonth = date.getMonth();
                             const itemYear = date.getFullYear();
@@ -606,7 +606,11 @@ class Dashboard {
 
         // Agregar reservas recientes
         const reservasRecientes = reservas
-            .sort((a, b) => new Date(b.fechaReserva || b.createdAt) - new Date(a.fechaReserva || a.createdAt))
+            .sort((a, b) => {
+                const fechaB = Utils.parseLocalDate(b.fechaReserva || b.createdAt);
+                const fechaA = Utils.parseLocalDate(a.fechaReserva || a.createdAt);
+                return (fechaB?.getTime() || 0) - (fechaA?.getTime() || 0);
+            })
             .slice(0, 2);
         
         reservasRecientes.forEach(reserva => {
@@ -637,7 +641,11 @@ class Dashboard {
         });
 
         return actividades
-            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .sort((a, b) => {
+                const fechaB = Utils.parseLocalDate(b.fecha);
+                const fechaA = Utils.parseLocalDate(a.fecha);
+                return (fechaB?.getTime() || 0) - (fechaA?.getTime() || 0);
+            })
             .slice(0, 5);
     }
 
@@ -677,8 +685,8 @@ class Dashboard {
                 
                 if (!dateStr) return;
                 
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return;
+                const date = Utils.parseLocalDate(dateStr);
+                if (!date) return;
                 
                 const itemMonthYear = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
                 
