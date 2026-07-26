@@ -158,6 +158,47 @@
                     </div>
                 </div>
 
+                <!-- Cumpleañeros Wrapper -->
+                <style>
+                    .birthdays-wrapper {
+                        display: flex;
+                        gap: 25px;
+                        margin-bottom: 30px;
+                    }
+                    .birthdays-wrapper > .birthdays-col {
+                        flex: 1;
+                        min-width: 0; /* Prevents flex items from overflowing */
+                    }
+                    @media (max-width: 768px) {
+                        .birthdays-wrapper {
+                            flex-direction: column;
+                        }
+                    }
+                </style>
+                <div class="birthdays-wrapper" style="display: none;">
+                    <!-- Cumpleañeros del Día -->
+                    <div class="birthdays-col card" id="todayBirthdays" style="background: linear-gradient(135deg, #ffffff 0%, #f3fdf5 100%); border-left: 5px solid #28a745; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 25px; border-radius: 12px; transition: transform 0.2s;">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="background: rgba(40, 167, 69, 0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <i class="fas fa-gift" style="color: #28a745; font-size: 20px;"></i>
+                            </div>
+                            <h3 style="color: #2c3e50; font-size: 1.2rem; margin: 0; font-weight: 700;">Cumpleañeros del Día</h3>
+                        </div>
+                        <div class="birthday-list" id="todayBirthdaysList" style="min-height: 80px;">Cargando...</div>
+                    </div>
+
+                    <!-- Próximos 7 días -->
+                    <div class="birthdays-col card" id="upcomingBirthdays" style="background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%); border-left: 5px solid #17a2b8; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 25px; border-radius: 12px; transition: transform 0.2s;">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="background: rgba(23, 162, 184, 0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <i class="fas fa-calendar-alt" style="color: #17a2b8; font-size: 20px;"></i>
+                            </div>
+                            <h3 style="color: #2c3e50; font-size: 1.2rem; margin: 0; font-weight: 700;">Próximos 7 días</h3>
+                        </div>
+                        <div class="birthday-list" id="upcomingBirthdaysList" style="min-height: 80px;">Cargando...</div>
+                    </div>
+                </div>
+
                 <!-- Main Charts Section - 3 GRÁFICOS EN 1 FILA -->
                 <div class="charts-main-section">
                     <div class="chart-card large">

@@ -23,6 +23,7 @@ class Dashboard {
             await this.loadCharts();
             this.loadPerformanceData();
             this.loadRecentActivity();
+            this.loadBirthdays();
             this.setupEventListeners();
             
         } catch (error) {
@@ -771,6 +772,81 @@ class Dashboard {
                 <p>No hay datos disponibles para mostrar.</p>
             </div>
         `;
+    }
+
+    async loadBirthdays() {
+        try {
+            const data = await this.app.api.get('/dashboard/birthdays');
+            this.renderBirthdays('todayBirthdaysList', data.delDia, true);
+            this.renderBirthdays('upcomingBirthdaysList', data.proximos, false);
+        } catch (error) {
+            console.error('Error loading birthdays:', error);
+            document.getElementById('todayBirthdaysList').innerHTML = '<div class="error-state">Error al cargar cumpleañeros</div>';
+            document.getElementById('upcomingBirthdaysList').innerHTML = '<div class="error-state">Error al cargar cumpleañeros</div>';
+        }
+    }
+
+    renderBirthdays(containerId, data, isToday) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div class="empty-state" style="padding: 20px; text-align: center; color: #6c757d;"><i class="fas fa-glass-cheers" style="font-size: 24px; margin-bottom: 10px; display: block;"></i><p style="margin:0;">No hay cumpleañeros ${isToday ? 'hoy' : 'en los próximos 7 días'}.</p></div>`;
+            return;
+        }
+
+        let html = '<ul style="list-style: none; padding: 0; margin: 0;">';
+        data.forEach(c => {
+            let cel = c.celular ? c.celular.trim() : '';
+            // Add 591 if number length is 8 digits
+            let waNumber = cel;
+            if (cel.length === 8) {
+                waNumber = '591' + cel;
+            } else if (cel.startsWith('+')) {
+                waNumber = cel.substring(1);
+            }
+            const paginaFelicitacion = `${app.api.BASE_URL}/dashboard/felicitacion/${c.id}`;
+            const mensaje = `¡Hola ${c.nombre}! 🎉\n\nDe parte de todo el equipo de Castillo & Asociados, queremos desearte un muy feliz cumpleaños. ¡Que pases un excelente día lleno de alegría!\n\n${paginaFelicitacion}`;
+            const wsLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(mensaje)}`;
+            
+            html += `
+                <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                    <div>
+                        <strong style="display: block;">${c.nombre} ${c.apellido}</strong>
+                        <span style="font-size: 0.85em; color: #666;">${c.fechaCumpleanos}</span>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        ${isToday ? `
+                            <a href="${wsLink}" target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none;" title="Enviar WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            ${!c.felicitado ? `
+                                <button class="btn btn-sm btn-outline" onclick="app.modules.dashboard.markBirthdayGreeted(${c.id})" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd; background: transparent; cursor:pointer;" title="Marcar como felicitado">
+                                    <i class="fas fa-check" style="color: #6c757d;"></i>
+                                </button>
+                            ` : `
+                                <span style="color: #28a745; padding: 5px 10px;" title="Ya fue felicitado este año">
+                                    <i class="fas fa-check-double"></i>
+                                </span>
+                            `}
+                        ` : ''}
+                    </div>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    async markBirthdayGreeted(clientId) {
+        try {
+            await this.app.api.post(`/dashboard/birthdays/${clientId}/greet`, {});
+            UI.showAlert('Felicitación registrada', 'success');
+            this.loadBirthdays();
+        } catch (error) {
+            console.error('Error marking greeting:', error);
+            UI.showAlert('Error al marcar la felicitación', 'error');
+        }
     }
 
     setupEventListeners() {

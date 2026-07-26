@@ -1728,6 +1728,17 @@ class Reservas {
                             </select>
                         </div>
                     </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">
+                            Fecha de Cumpleaños (Opcional):
+                        </label>
+                        <input 
+                            type="date" 
+                            id="fechaCumpleanosFirma" 
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+                        >
+                    </div>
 
                     <p style="color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; margin-top: 15px;">
                         <i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.
@@ -1758,6 +1769,12 @@ class Reservas {
                 const [fechaPagoInicio, fechaPagoFin] = (document.getElementById('fechaPagoFirma')?.value || '10-15')
                     .split('-')
                     .map(value => parseInt(value, 10));
+                
+                const fechaCumpleanosStr = document.getElementById('fechaCumpleanosFirma')?.value;
+                let fechaCumpleanos = null;
+                if (fechaCumpleanosStr) {
+                    fechaCumpleanos = new Date(fechaCumpleanosStr).toISOString();
+                }
 
                 // Validaciones
                 if (!metodoPago) {
@@ -1793,14 +1810,15 @@ class Reservas {
                     cuotaInicial,
                     tiempoFinanciamiento,
                     fechaPagoInicio,
-                    fechaPagoFin
+                    fechaPagoFin,
+                    fechaCumpleanos
                 };
             },
 
             didOpen: () => {
                 // Asegurar que los inputs tengan el ancho correcto
                 setTimeout(() => {
-                    const inputs = document.querySelectorAll('#metodoPagoFirma, #montoFirma, #precioLoteFirma, #cuotaInicialFirma, #tiempoFinanciamientoFirma, #fechaPagoFirma');
+                    const inputs = document.querySelectorAll('#metodoPagoFirma, #montoFirma, #precioLoteFirma, #cuotaInicialFirma, #tiempoFinanciamientoFirma, #fechaPagoFirma, #fechaCumpleanosFirma');
                     inputs.forEach(input => {
                         input.style.width = '100%';
                     });
@@ -1811,7 +1829,7 @@ class Reservas {
             }
         }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const { metodoPago, monto, precioLote, cuotaInicial, tiempoFinanciamiento, fechaPagoInicio, fechaPagoFin } = result.value;
+                    const { metodoPago, monto, precioLote, cuotaInicial, tiempoFinanciamiento, fechaPagoInicio, fechaPagoFin, fechaCumpleanos } = result.value;
                     
                     try {
                         await this.procesarFirma(reservaId, metodoPago, monto, {
@@ -1819,7 +1837,8 @@ class Reservas {
                             cuotaInicial,
                             tiempoFinanciamiento,
                             fechaPagoInicio,
-                            fechaPagoFin
+                            fechaPagoFin,
+                            fechaCumpleanos
                         });
                     } catch (error) {
                         console.error('Error en la firma:', error);
