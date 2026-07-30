@@ -895,8 +895,8 @@ class Reservas {
                                     Ver más
                                 </button>
                                 
-                                <!-- Editar - Solo para agentes en sus propias reservas en estados editables -->
-                                ${esAgente && esPropiaReserva && puedeEditar ? `
+                                <!-- Editar - Para admin o agentes en sus propias reservas en estados editables -->
+                                ${(esAdmin || (esAgente && esPropiaReserva)) && puedeEditar ? `
                                 <button class="action-item" data-action="editar" data-id="${reserva.id}">
                                     <i class="fas fa-edit"></i>
                                     Editar
