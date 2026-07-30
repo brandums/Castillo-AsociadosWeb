@@ -360,6 +360,11 @@ class Reservas {
                 <option value="480">480 Bs (7 días)</option>
                 <option value="1000">1000 Bs (20 días)</option>
             `;
+        } else if (proyectoId === '5') { // TRES MARIAS
+            montoSelect.innerHTML += `
+                <option value="300">300 Bs (7 días)</option>
+                <option value="1000">1000 Bs (20 días)</option>
+            `;
         } else {
             // Para otros proyectos, solo mostrar 1000 Bs
             montoSelect.innerHTML += `
@@ -1661,6 +1666,7 @@ class Reservas {
             const clientes = this.allProspectos;
             const cliente = clientes.find(c => c.id && c.id.toString() === reserva.clienteId.toString());
             const nombreCliente = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'Cliente';
+            const esTresMarias = reserva.proyectoId === '5' || reserva.proyectoId === 5;
 
             // Mostrar modal con formulario para método de pago y monto
             Swal.fire({
@@ -1740,6 +1746,21 @@ class Reservas {
                         >
                     </div>
 
+                    ${esTresMarias ? `
+                    <div style="margin-bottom: 15px; background: #e8f4fd; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #0c5460;">
+                            <i class="fas fa-star" style="color: #f0ad4e;"></i> Modalidad de Pago (Tres Marias):
+                        </label>
+                        <select id="modalidadPagoFirma" 
+                                style="width: 100%; padding: 8px; border: 1px solid #bee5eb; border-radius: 4px; box-sizing: border-box; background: white;">
+                            <option value="">Seleccionar modalidad...</option>
+                            <option value="Credito20">Crédito - Cuota inicial 20% (2 puntos)</option>
+                            <option value="Credito35">Crédito - Cuota inicial 35% (2.5 puntos)</option>
+                            <option value="Contado">Contado (3 puntos)</option>
+                        </select>
+                    </div>
+                    ` : ''}
+
                     <p style="color: #856404; background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; margin-top: 15px;">
                         <i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.
                     </p>
@@ -1776,6 +1797,10 @@ class Reservas {
                     fechaCumpleanos = new Date(fechaCumpleanosStr).toISOString();
                 }
 
+                // Modalidad de pago (solo para Tres Marias)
+                const modalidadPagoEl = document.getElementById('modalidadPagoFirma');
+                const modalidadPago = modalidadPagoEl ? modalidadPagoEl.value : null;
+
                 // Validaciones
                 if (!metodoPago) {
                     Swal.showValidationMessage('Por favor, selecciona un método de pago.');
@@ -1802,6 +1827,12 @@ class Reservas {
                     return false;
                 }
 
+                // Validar modalidad de pago para Tres Marias
+                if (modalidadPagoEl && !modalidadPago) {
+                    Swal.showValidationMessage('Por favor, selecciona la modalidad de pago para Tres Marias.');
+                    return false;
+                }
+
                 // Retornar valores al then()
                 return {
                     metodoPago,
@@ -1811,7 +1842,8 @@ class Reservas {
                     tiempoFinanciamiento,
                     fechaPagoInicio,
                     fechaPagoFin,
-                    fechaCumpleanos
+                    fechaCumpleanos,
+                    modalidadPago: modalidadPago || null
                 };
             },
 
@@ -1829,7 +1861,7 @@ class Reservas {
             }
         }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const { metodoPago, monto, precioLote, cuotaInicial, tiempoFinanciamiento, fechaPagoInicio, fechaPagoFin, fechaCumpleanos } = result.value;
+                    const { metodoPago, monto, precioLote, cuotaInicial, tiempoFinanciamiento, fechaPagoInicio, fechaPagoFin, fechaCumpleanos, modalidadPago } = result.value;
                     
                     try {
                         await this.procesarFirma(reservaId, metodoPago, monto, {
@@ -1838,7 +1870,8 @@ class Reservas {
                             tiempoFinanciamiento,
                             fechaPagoInicio,
                             fechaPagoFin,
-                            fechaCumpleanos
+                            fechaCumpleanos,
+                            modalidadPago
                         });
                     } catch (error) {
                         console.error('Error en la firma:', error);
