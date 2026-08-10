@@ -362,7 +362,7 @@ class Reservas {
             `;
         } else if (proyectoId === '5') { // TRES MARIAS
             montoSelect.innerHTML += `
-                <option value="300">300 Bs (7 días)</option>
+                <option value="300">300 Bs (10 días)</option>
                 <option value="1000">1000 Bs (20 días)</option>
             `;
         } else {
