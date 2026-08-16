@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -63,6 +63,10 @@
             <li class="nav-item" data-tab="ranking">
                 <i class="fas fa-trophy"></i>
                 <span>Ranking</span>
+            </li>
+            <li class="nav-item" data-tab="visitas">
+                <i class="fas fa-car"></i>
+                <span>Visitas</span>
             </li>
         </ul>
     </nav>
@@ -199,6 +203,453 @@
                     </div>
                 </div>
 
+
+                <!-- Calendar Component Styles -->
+                <style>
+                    .calendar-dashboard-section {
+                        background: #ffffff;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                        padding: 22px;
+                        margin-bottom: 25px;
+                        border: 1px solid #edf2f7;
+                        box-sizing: border-box;
+                        width: 100%;
+                        overflow: hidden;
+                    }
+                    .calendar-section-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        margin-bottom: 18px;
+                        border-bottom: 1px solid #edf2f7;
+                        padding-bottom: 14px;
+                    }
+                    .calendar-filter-pills {
+                        display: flex;
+                        gap: 4px;
+                        background: #f8fafc;
+                        padding: 4px;
+                        border-radius: 10px;
+                        border: 1px solid #e2e8f0;
+                        box-sizing: border-box;
+                    }
+                    .cal-filter-btn {
+                        border: none;
+                        background: transparent;
+                        padding: 6px 12px;
+                        border-radius: 7px;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        color: #64748b;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        white-space: nowrap;
+                    }
+                    .cal-filter-btn:hover {
+                        color: #1e293b;
+                    }
+                    .cal-filter-btn.active {
+                        background: #ffffff;
+                        color: #2b72eb;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                    }
+                    .calendar-layout-wrapper {
+                        display: grid;
+                        grid-template-columns: 1.15fr 0.85fr;
+                        gap: 20px;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .calendar-grid-container {
+                        background: #ffffff;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 14px 12px;
+                        box-sizing: border-box;
+                        width: 100%;
+                    }
+                    .calendar-month-nav {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                        gap: 6px;
+                    }
+                    .nav-controls {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    .cal-month-title {
+                        margin: 0;
+                        font-size: 1.05rem;
+                        font-weight: 700;
+                        color: #1e293b;
+                        text-align: center;
+                        text-transform: capitalize;
+                    }
+                    .btn-cal-nav {
+                        width: 30px;
+                        height: 30px;
+                        border: 1px solid #cbd5e1;
+                        background: #ffffff;
+                        border-radius: 7px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #475569;
+                        transition: all 0.15s;
+                        padding: 0;
+                        flex-shrink: 0;
+                    }
+                    .btn-cal-nav:hover {
+                        background: #f1f5f9;
+                        color: #1e293b;
+                        border-color: #94a3b8;
+                    }
+                    .calendar-weekdays-grid {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        text-align: center;
+                        font-size: 0.72rem;
+                        font-weight: 700;
+                        color: #94a3b8;
+                        text-transform: uppercase;
+                        margin-bottom: 6px;
+                        width: 100%;
+                    }
+                    .calendar-days-grid {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 2px;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .cal-day-cell {
+                        height: 38px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 6px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: #334155;
+                        cursor: pointer;
+                        position: relative;
+                        transition: all 0.15s ease;
+                        border: 1px solid transparent;
+                        box-sizing: border-box;
+                        padding: 2px 0;
+                        user-select: none;
+                    }
+                    .cal-day-cell:hover:not(.empty-day) {
+                        background: #f1f5f9;
+                        border-color: #cbd5e1;
+                    }
+                    .cal-day-cell.empty-day {
+                        cursor: default;
+                        opacity: 0.25;
+                    }
+                    .cal-day-cell.today-day {
+                        background: #eff6ff;
+                        border-color: #93c5fd;
+                        color: #1d4ed8;
+                    }
+                    .cal-day-cell.selected-day {
+                        background: #2b72eb !important;
+                        color: #ffffff !important;
+                        box-shadow: 0 3px 8px rgba(43, 114, 235, 0.35);
+                    }
+                    .cal-day-dots {
+                        display: flex;
+                        gap: 3px;
+                        margin-top: 2px;
+                        height: 5px;
+                        align-items: center;
+                    }
+                    .cal-dot {
+                        width: 5px;
+                        height: 5px;
+                        border-radius: 50%;
+                    }
+                    .dot-visita {
+                        background: #10b981;
+                    }
+                    .dot-reserva {
+                        background: #f59e0b;
+                    }
+                    .dot-cancelada {
+                        background: #ef4444;
+                    }
+                    .cal-day-cell.selected-day .cal-dot {
+                        background: #ffffff !important;
+                    }
+                    .calendar-legend {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-top: 12px;
+                        padding-top: 10px;
+                        border-top: 1px solid #f1f5f9;
+                        font-size: 0.72rem;
+                        color: #64748b;
+                        justify-content: center;
+                    }
+                    .legend-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        white-space: nowrap;
+                    }
+                    .legend-dot {
+                        width: 7px;
+                        height: 7px;
+                        border-radius: 50%;
+                    }
+                    .calendar-agenda-container {
+                        background: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 16px 14px;
+                        display: flex;
+                        flex-direction: column;
+                        box-sizing: border-box;
+                        width: 100%;
+                    }
+                    .agenda-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin-bottom: 12px;
+                        padding-bottom: 10px;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+                    .agenda-events-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        overflow-y: auto;
+                        max-height: 380px;
+                        padding-right: 2px;
+                    }
+                    .agenda-event-card {
+                        background: #ffffff;
+                        border-radius: 10px;
+                        padding: 12px 14px;
+                        border: 1px solid #e2e8f0;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        transition: transform 0.15s, box-shadow 0.15s;
+                        box-sizing: border-box;
+                    }
+                    .agenda-event-card:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+                    }
+                    .agenda-event-card.event-visita {
+                        border-left: 4px solid #10b981;
+                    }
+                    .agenda-event-card.event-reserva {
+                        border-left: 4px solid #f59e0b;
+                    }
+                    .agenda-event-card.event-cancelada {
+                        border-left: 4px solid #ef4444;
+                        opacity: 0.88;
+                    }
+                    .agenda-event-top {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 4px;
+                    }
+                    .agenda-event-title {
+                        font-weight: 700;
+                        font-size: 0.9rem;
+                        color: #1e293b;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    .agenda-event-time {
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        color: #475569;
+                    }
+                    .agenda-event-details {
+                        font-size: 0.8rem;
+                        color: #64748b;
+                        line-height: 1.45;
+                    }
+                    .agenda-event-actions {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin-top: 4px;
+                        padding-top: 6px;
+                        border-top: 1px dashed #f1f5f9;
+                    }
+
+                    /* Responsive Styles */
+                    @media (max-width: 960px) {
+                        .calendar-layout-wrapper {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                    @media (max-width: 768px) {
+                        .calendar-dashboard-section {
+                            padding: 14px 10px;
+                            margin-bottom: 20px;
+                        }
+                        .calendar-section-header {
+                            flex-direction: column;
+                            align-items: stretch;
+                            gap: 12px;
+                            margin-bottom: 14px;
+                            padding-bottom: 12px;
+                        }
+                        .calendar-filter-pills {
+                            width: 100%;
+                            display: flex;
+                        }
+                        .cal-filter-btn {
+                            flex: 1;
+                            justify-content: center;
+                            padding: 6px 4px;
+                            font-size: 0.74rem;
+                        }
+                        .calendar-grid-container {
+                            padding: 10px 6px;
+                        }
+                        .cal-day-cell {
+                            height: 35px;
+                            font-size: 0.78rem;
+                        }
+                        .cal-month-title {
+                            font-size: 0.92rem;
+                        }
+                        .btn-cal-nav {
+                            width: 28px;
+                            height: 28px;
+                        }
+                        .calendar-weekdays-grid {
+                            font-size: 0.66rem;
+                        }
+                        .calendar-legend {
+                            gap: 6px;
+                            font-size: 0.68rem;
+                        }
+                        .calendar-agenda-container {
+                            padding: 12px 8px;
+                        }
+                        .agenda-event-card {
+                            padding: 10px;
+                        }
+                        .agenda-event-actions {
+                            flex-direction: column;
+                            align-items: stretch;
+                            gap: 6px;
+                        }
+                        .agenda-event-actions > div {
+                            width: 100%;
+                            display: flex;
+                            justify-content: flex-end;
+                            gap: 6px;
+                        }
+                    }
+                </style>
+
+                <!-- Calendario de Actividades (Visitas y Reservas) -->
+                <div class="calendar-dashboard-section">
+                    <div class="calendar-section-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="background: rgba(43, 114, 235, 0.1); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-calendar-alt" style="color: #2b72eb; font-size: 20px;"></i>
+                            </div>
+                            <div>
+                                <h3 style="color: #2c3e50; font-size: 1.2rem; margin: 0; font-weight: 700;">Calendario de Visitas</h3>
+                                <span style="font-size: 0.85rem; color: #718096;">Visitas programadas a proyectos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout 2 Columnas -->
+                    <div class="calendar-layout-wrapper">
+                        <!-- Columna Izquierda: Grid Calendario -->
+                        <div class="calendar-grid-container">
+                            <!-- Barra de Navegación del Mes -->
+                            <div class="calendar-month-nav">
+                                <div class="nav-controls">
+                                    <button class="btn-cal-nav" id="calPrevMonth" title="Mes Anterior">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h4 id="calMonthYearTitle" class="cal-month-title">Mes Año</h4>
+                                    <button class="btn-cal-nav" id="calNextMonth" title="Mes Siguiente">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-outline" id="calTodayBtn" style="padding: 4px 12px; font-size: 0.85rem; border-radius: 6px;">
+                                    Hoy
+                                </button>
+                            </div>
+
+                            <!-- Días de la semana -->
+                            <div class="calendar-weekdays-grid">
+                                <div>Lun</div>
+                                <div>Mar</div>
+                                <div>Mié</div>
+                                <div>Jue</div>
+                                <div>Vie</div>
+                                <div>Sáb</div>
+                                <div>Dom</div>
+                            </div>
+
+                            <!-- Cuadrícula de Días -->
+                            <div class="calendar-days-grid" id="calendarDaysGrid">
+                                <!-- Días generados dinámicamente -->
+                            </div>
+
+                            <!-- Leyenda -->
+                            <div class="calendar-legend">
+                                <span class="legend-item"><span class="legend-dot dot-visita"></span> Visita Programada</span>
+                                <span class="legend-item"><span class="legend-dot dot-cancelada"></span> Cancelada</span>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Agenda del Día -->
+                        <div class="calendar-agenda-container">
+                            <div class="agenda-header">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-calendar-day" style="color: #2b72eb;"></i>
+                                    <h4 id="agendaSelectedDateTitle" style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700;">
+                                        Agenda del Día
+                                    </h4>
+                                </div>
+                                <span class="badge badge-info" id="agendaEventsCount">0 eventos</span>
+                            </div>
+
+                            <!-- Lista de Eventos -->
+                            <div class="agenda-events-list" id="agendaEventsList">
+                                <!-- Eventos del día cargados dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Main Charts Section - 3 GRÁFICOS EN 1 FILA -->
                 <div class="charts-main-section">
                     <div class="chart-card large">
@@ -255,6 +706,84 @@
                 </div>
             </div>
 
+                        <!-- Visitas Tab -->
+            <div class="tab-content" id="visitasTab">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Visitas</h2>
+                        <div class="header-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="visitasSearch" placeholder="Buscar visita...">
+                            </div>
+
+                            <!-- Botón Voltear Lista -->
+                            <button class="btn btn-outline" id="btnVoltearVisitas" title="Voltear lista">
+                                <i class="fas fa-sort-amount-down-alt"></i>
+                                <span class="btn-text">Voltear</span>
+                            </button>
+
+                            <!-- Botón de Filtros -->
+                            <button class="btn btn-outline" id="btnFiltrosVisitas" title="Filtros">
+                                <i class="fas fa-filter"></i>
+                                <span class="btn-text">Filtros</span>
+                            </button>
+
+                            <button class="btn btn-primary" id="exportVisitas" title="Exportar">
+                                <i class="fas fa-download"></i>
+                                <span class="btn-text">Exportar</span>
+                            </button>
+
+                            <button class="btn btn-success" id="btnNuevaVisita" title="Programar Visita">
+                                <i class="fas fa-plus"></i>
+                                <span class="btn-text">Nueva Visita</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Visitas -->
+                    <div class="table-responsive">
+                        <table class="data-table" id="visitasTable">
+                            <thead>
+                                <tr>
+                                    <th>Prospecto</th>
+                                    <th>Proyecto</th>
+                                    <th class="col-hide-mobile">Fecha</th>
+                                    <th class="col-hide-mobile">Hora</th>
+                                    <th class="col-hide-mobile">Agente</th>
+                                    <th>Estado</th>
+                                    <th class="actions-column">
+                                        <span>Más</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="visitasTableBody">
+                                <!-- Los datos se cargarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="pagination" id="visitasPagination">
+                        <div class="pagination-content">
+                            <div class="pagination-controls">
+                                <button class="pagination-btn pagination-nav" id="prevPageVisitas" title="Página anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Anterior</span>
+                                </button>
+                                
+                                <div class="pagination-numbers" id="pageNumbersVisitas">
+                                </div>
+                                
+                                <button class="pagination-btn pagination-nav" id="nextPageVisitas" title="Página siguiente">
+                                    <span>Siguiente</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Prospectos Tab -->
             <div class="tab-content" id="prospectosTab">
                 <div class="content-section">
@@ -882,6 +1411,105 @@
         </div>
     </div>
 
+        <!-- Modal de Filtros para Visitas -->
+    <div class="modal" id="modalFiltrosVisitas">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Filtrar Visitas</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-grid">
+                    <!-- Filtro por Rango de Fechas -->
+                    <div class="filter-group">
+                        <label class="filter-label">Rango de Fechas</label>
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label for="fechaInicioVisitas">Desde</label>
+                                <input type="date" id="fechaInicioVisitas" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaFinVisitas">Hasta</label>
+                                <input type="date" id="fechaFinVisitas" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Proyecto y Estado -->
+                    <div class="filter-group">
+                        <div class="date-range">
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroProyectoVisitas">Proyecto</label>
+                                <select id="filtroProyectoVisitas" class="form-control">
+                                    <option value="todos">Todos los proyectos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="filter-label" for="filtroEstadoVisitas">Estado</label>
+                                <select id="filtroEstadoVisitas" class="form-control">
+                                    <option value="todos">Todos los estados</option>
+                                    <option value="0">Programada</option>
+                                    <option value="1">Completada</option>
+                                    <option value="2">Cancelada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnLimpiarFiltrosVisitas">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalFiltrosVisitas')">
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btnAplicarFiltrosVisitas">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Visita -->
+    <div class="modal" id="modalVisita">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Programar Visita</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formVisita">
+                    <div class="form-group">
+                        <label for="visitaFecha">Fecha de la Visita *</label>
+                        <input type="date" id="visitaFecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitaHora">Hora *</label>
+                        <input type="time" id="visitaHora" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitaProyecto">Proyecto *</label>
+                        <select id="visitaProyecto" class="form-control" required>
+                            <option value="">Seleccione un proyecto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitaProspecto">Prospecto *</label>
+                        <select id="visitaProspecto" class="form-control" required>
+                            <option value="">Seleccione un prospecto</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('modalVisita')">Cancelar</button>
+                <button class="btn btn-primary" id="btnGuardarVisita">
+                    <i class="fas fa-save"></i> Guardar Visita
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Modal Crear/Editar Prospecto -->
     <div class="modal" id="modalProspecto">
         <div class="modal-content modal-md">
@@ -2241,6 +2869,7 @@
     <!-- Módulos -->
     <script src="js/modules/dashboard.js"></script>
     <script src="js/modules/prospectos.js"></script>
+    <script src="js/modules/visitas.js"></script>
     <script src="js/modules/clientes.js"></script>
     <script src="js/modules/agentes.js"></script>
     <script src="js/modules/contratos.js"></script>

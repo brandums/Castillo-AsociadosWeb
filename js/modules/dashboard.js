@@ -11,6 +11,15 @@ class Dashboard {
         this.chartInstances = {};
         this.dashboardData = null;
         this.previousMonthData = {};
+        
+        // Estado del Calendario Interactivo
+        this.calendarCurrentDate = new Date();
+        this.calendarSelectedDate = new Date();
+        this.calendarFilter = 'todos';
+        this.calendarVisitas = [];
+        this.calendarReservas = [];
+        this.calendarEventsMap = {};
+        this.calendarListenersSetup = false;
     }
 
     async init() {
@@ -24,6 +33,7 @@ class Dashboard {
             this.loadPerformanceData();
             this.loadRecentActivity();
             this.loadBirthdays();
+            await this.loadCalendarData();
             this.setupEventListeners();
             
         } catch (error) {
@@ -860,5 +870,277 @@ class Dashboard {
 
     cleanup() {
         this.destroyCharts();
+    }
+
+    // ==========================================
+    // MÓDULO CALENDARIO DE VISITAS (SOLO VISITAS)
+    // ==========================================
+
+    formatDateKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    async loadCalendarData() {
+        try {
+            const url = `${API_URL}/visitas`;
+            const headers = this.app.auth.getAuthHeaders();
+            const resVisitas = await fetch(url, { headers });
+            if (resVisitas.ok) {
+                this.calendarVisitas = await resVisitas.json();
+            } else {
+                this.calendarVisitas = [];
+            }
+        } catch (e) {
+            console.warn('Error cargando visitas del calendario:', e);
+            this.calendarVisitas = [];
+        }
+
+        this.renderCalendar();
+        this.renderCalendarAgenda();
+        this.setupCalendarEventListeners();
+    }
+
+    renderCalendar() {
+        const year = this.calendarCurrentDate.getFullYear();
+        const month = this.calendarCurrentDate.getMonth();
+
+        // Título del mes en español
+        const monthNames = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+        const titleEl = document.getElementById('calMonthYearTitle');
+        if (titleEl) {
+            titleEl.textContent = `${monthNames[month]} ${year}`;
+        }
+
+        // Agrupar visitas por fecha YYYY-MM-DD
+        this.calendarEventsMap = {};
+
+        (this.calendarVisitas || []).forEach(v => {
+            try {
+                const dateObj = new Date(v.visitDate);
+                if (isNaN(dateObj.getTime())) return;
+                const dateKey = this.formatDateKey(dateObj);
+                if (!this.calendarEventsMap[dateKey]) this.calendarEventsMap[dateKey] = [];
+                this.calendarEventsMap[dateKey].push({
+                    type: 'visita',
+                    data: v,
+                    date: dateObj
+                });
+            } catch (err) {}
+        });
+
+        // Construir cuadrícula de días
+        const grid = document.getElementById('calendarDaysGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        // Primer día del mes (Lunes = 0)
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const startOffset = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        // Días previos
+        for (let i = startOffset - 1; i >= 0; i--) {
+            const cell = document.createElement('div');
+            cell.className = 'cal-day-cell empty-day';
+            cell.textContent = daysInPrevMonth - i;
+            grid.appendChild(cell);
+        }
+
+        const todayKey = this.formatDateKey(new Date());
+        const selectedKey = this.formatDateKey(this.calendarSelectedDate);
+
+        // Días del mes
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDayDate = new Date(year, month, day);
+            const dateKey = this.formatDateKey(currentDayDate);
+            const events = this.calendarEventsMap[dateKey] || [];
+
+            const cell = document.createElement('div');
+            cell.className = 'cal-day-cell';
+            cell.dataset.date = dateKey;
+
+            if (dateKey === todayKey) cell.classList.add('today-day');
+            if (dateKey === selectedKey) cell.classList.add('selected-day');
+
+            const dayNum = document.createElement('span');
+            dayNum.textContent = day;
+            cell.appendChild(dayNum);
+
+            // Indicadores de visitas (dots)
+            if (events.length > 0) {
+                const dotsContainer = document.createElement('div');
+                dotsContainer.className = 'cal-day-dots';
+
+                let hasProgramada = false;
+                let hasCancelada = false;
+
+                events.forEach(e => {
+                    if (e.data.status === 2) hasCancelada = true;
+                    else hasProgramada = true;
+                });
+
+                if (hasProgramada) {
+                    const dot = document.createElement('span');
+                    dot.className = 'cal-dot dot-visita';
+                    dot.title = 'Visita Programada';
+                    dotsContainer.appendChild(dot);
+                }
+                if (hasCancelada) {
+                    const dot = document.createElement('span');
+                    dot.className = 'cal-dot dot-cancelada';
+                    dot.title = 'Visita Cancelada';
+                    dotsContainer.appendChild(dot);
+                }
+
+                cell.appendChild(dotsContainer);
+            }
+
+            grid.appendChild(cell);
+        }
+
+        // Celdas para completar la última semana
+        const totalCells = startOffset + daysInMonth;
+        const remainingCells = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
+        for (let j = 1; j <= remainingCells; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cal-day-cell empty-day';
+            cell.textContent = j;
+            grid.appendChild(cell);
+        }
+    }
+
+    renderCalendarAgenda() {
+        const dateKey = this.formatDateKey(this.calendarSelectedDate);
+        const events = this.calendarEventsMap[dateKey] || [];
+
+        // Título de la agenda en español
+        const titleEl = document.getElementById('agendaSelectedDateTitle');
+        if (titleEl) {
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const formatted = this.calendarSelectedDate.toLocaleDateString('es-ES', options);
+            titleEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+
+        const countEl = document.getElementById('agendaEventsCount');
+        if (countEl) {
+            countEl.textContent = `${events.length} ${events.length === 1 ? 'visita' : 'visitas'}`;
+        }
+
+        const container = document.getElementById('agendaEventsList');
+        if (!container) return;
+
+        if (events.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 30px 15px; color: #94a3b8;">
+                    <i class="fas fa-car" style="font-size: 2.2rem; margin-bottom: 12px; opacity: 0.4; color: #cbd5e1;"></i>
+                    <h5 style="margin: 0 0 6px 0; color: #475569; font-weight: 600;">Sin visitas</h5>
+                    <p style="margin: 0 0 15px 0; font-size: 0.82rem;">No hay visitas programadas para este día.</p>
+                    <button class="btn btn-sm btn-success" onclick="app.showModule('visitas')" style="padding: 6px 14px; font-size: 0.8rem; border-radius: 6px;">
+                        <i class="fas fa-plus"></i> Programar Visita
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        events.forEach(item => {
+            const v = item.data;
+            const timeStr = item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const isCancelled = v.status === 2;
+            const isCompleted = v.status === 1;
+            const badgeClass = isCancelled ? 'danger' : (isCompleted ? 'primary' : 'success');
+            const badgeText = isCancelled ? 'Cancelada' : (isCompleted ? 'Completada' : 'Programada');
+            const cardTypeClass = isCancelled ? 'event-cancelada' : 'event-visita';
+
+            const mensaje = `Buen día, consulta sobre la visita programada para ${v.projectName} a las ${timeStr} para el prospecto ${v.prospectName}.`;
+            const wsUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+
+            html += `
+                <div class="agenda-event-card ${cardTypeClass}">
+                    <div class="agenda-event-top">
+                        <div class="agenda-event-title">
+                            <i class="fas fa-car" style="color: ${isCancelled ? '#ef4444' : '#10b981'};"></i>
+                            <span>Visita: ${v.projectName || 'Proyecto'}</span>
+                        </div>
+                        <span class="agenda-event-time">
+                            <i class="fas fa-clock" style="font-size: 0.75rem;"></i> ${timeStr}
+                        </span>
+                    </div>
+                    <div class="agenda-event-details">
+                        <div><strong>Prospecto:</strong> ${v.prospectName || 'No especificado'}</div>
+                        <div><strong>Asesor:</strong> ${v.agentName || 'No especificado'}</div>
+                    </div>
+                    <div class="agenda-event-actions">
+                        <span class="badge badge-${badgeClass}">${badgeText}</span>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="${wsUrl}" target="_blank" class="btn btn-sm" style="background: #25D366; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; text-decoration: none;" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline" onclick="app.showModule('visitas')" style="padding: 4px 8px; font-size: 0.75rem;">
+                                Ver en Visitas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    setupCalendarEventListeners() {
+        if (this.calendarListenersSetup) return;
+        this.calendarListenersSetup = true;
+
+        const prevBtn = document.getElementById('calPrevMonth');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                this.calendarCurrentDate.setMonth(this.calendarCurrentDate.getMonth() - 1);
+                this.renderCalendar();
+            });
+        }
+
+        const nextBtn = document.getElementById('calNextMonth');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                this.calendarCurrentDate.setMonth(this.calendarCurrentDate.getMonth() + 1);
+                this.renderCalendar();
+            });
+        }
+
+        const todayBtn = document.getElementById('calTodayBtn');
+        if (todayBtn) {
+            todayBtn.addEventListener('click', () => {
+                this.calendarCurrentDate = new Date();
+                this.calendarSelectedDate = new Date();
+                this.renderCalendar();
+                this.renderCalendarAgenda();
+            });
+        }
+
+        const grid = document.getElementById('calendarDaysGrid');
+        if (grid) {
+            grid.addEventListener('click', (e) => {
+                const cell = e.target.closest('.cal-day-cell:not(.empty-day)');
+                if (cell && cell.dataset.date) {
+                    const [y, m, d] = cell.dataset.date.split('-').map(Number);
+                    this.calendarSelectedDate = new Date(y, m - 1, d);
+
+                    document.querySelectorAll('.cal-day-cell.selected-day').forEach(c => c.classList.remove('selected-day'));
+                    cell.classList.add('selected-day');
+
+                    this.renderCalendarAgenda();
+                }
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-// js/app.js - VERSIÓN CORREGIDA
+﻿// js/app.js - VERSIÓN CORREGIDA
 class App {
     constructor() {
         this.auth = new AuthManager();
@@ -193,6 +193,7 @@ class App {
         this.modules.clientes = new Clientes(this);
         this.modules.agentes = new Agentes(this);
         this.modules.contratos = new Contratos(this);
+        this.modules.visitas = new Visitas(this);
         this.modules.equipos = new Equipos(this);
         this.modules.prorrogas = new Prorrogas(this);
         this.modules.ranking = new Ranking(this);
@@ -304,9 +305,9 @@ class App {
 
         // Definir permisos por rol
         const permissions = {
-            'agente': ['dashboard', 'prospectos', 'clientes', 'reservas', 'contratos', 'prorrogas', 'ranking'],
-            'admin': ['dashboard', 'prospectos', 'clientes', 'agentes', 'reservas', 'contratos', 'prorrogas', 'equipos', 'ranking'],
-            'superadmin': ['dashboard', 'prospectos', 'clientes', 'agentes', 'reservas', 'contratos', 'prorrogas', 'equipos', 'ranking']
+            'agente': ['dashboard', 'prospectos', 'clientes', 'reservas', 'contratos', 'prorrogas', 'ranking', 'visitas'],
+            'admin': ['dashboard', 'prospectos', 'clientes', 'agentes', 'reservas', 'contratos', 'prorrogas', 'equipos', 'ranking', 'visitas'],
+            'superadmin': ['dashboard', 'prospectos', 'clientes', 'agentes', 'reservas', 'contratos', 'prorrogas', 'equipos', 'ranking', 'visitas']
         };
 
         const userRole = user.rol.toLowerCase();
