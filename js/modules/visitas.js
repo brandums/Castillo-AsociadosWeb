@@ -547,7 +547,9 @@ class Visitas {
             return;
         }
 
-        const visitDate = new Date(`${fecha}T${hora}`).toISOString();
+        // Enviar fecha-hora SIN convertir a UTC para evitar desfase de zona horaria
+        // El servidor no usa hora boliviana, así que enviamos la hora tal cual
+        const visitDate = `${fecha}T${hora}:00`;
 
         try {
             await this._safePost('/visitas', {
