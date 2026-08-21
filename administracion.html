@@ -1495,11 +1495,18 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="visitaProspecto">Prospecto *</label>
-                        <select id="visitaProspecto" class="form-control" required>
-                            <option value="">Seleccione un prospecto</option>
-                        </select>
-                    </div>
+                            <label for="visitaProspecto">Prospecto *</label>
+                            <select id="visitaProspecto" class="form-control" required>
+                                <option value="">Seleccione un prospecto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="visitaPersonas">Número de Personas (Prospecto y acompañantes) *</label>
+                            <input type="number" id="visitaPersonas" class="form-control" min="1" max="7" value="1" required>
+                            <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">
+                                <i class="fas fa-info-circle"></i> Sin contar al asesor. La movilidad tiene capacidad máxima de 8 pasajeros.
+                            </small>
+                        </div>
                 </form>
             </div>
             <div class="modal-footer">

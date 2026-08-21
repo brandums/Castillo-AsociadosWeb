@@ -259,6 +259,9 @@ class Visitas {
                     </button>`;
             }
 
+            const personas = v.attendeesCount || 1;
+            const cuposOcupados = v.occupiedSeatsOnTrip || (personas + 1);
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
@@ -266,6 +269,7 @@ class Visitas {
                         <div class="main-info">${v.prospectName}</div>
                         <div class="mobile-secondary-info">
                             <span class="mobile-extra"><i class="fas fa-user-tie"></i> ${v.agentName}</span>
+                            <span class="mobile-extra"><i class="fas fa-users"></i> ${personas} ${personas === 1 ? 'persona' : 'personas'}</span>
                         </div>
                     </div>
                 </td>
@@ -275,6 +279,7 @@ class Visitas {
                         <div class="mobile-secondary-info">
                             <span class="mobile-extra"><i class="fas fa-calendar"></i> ${dateStr}</span>
                             <span class="mobile-extra"><i class="fas fa-clock"></i> ${timeStr}</span>
+                            <span class="mobile-extra"><i class="fas fa-shuttle-van"></i> Salida: ${cuposOcupados}/8 cupos</span>
                         </div>
                     </div>
                 </td>
@@ -381,21 +386,27 @@ class Visitas {
         const timeStr = fecha.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const estado = v.status === 0 ? 'Programada' : (v.status === 1 ? 'Completada' : 'Cancelada');
 
+        const personas = v.attendeesCount || 1;
+        const cuposOcupados = v.occupiedSeatsOnTrip || (personas + 1);
+        const cuposDisponibles = v.availableSeatsOnTrip !== undefined ? v.availableSeatsOnTrip : Math.max(0, 8 - cuposOcupados);
+
         Swal.fire({
             title: 'Detalles de la Visita',
             html: `
-                <div style="text-align: left; line-height: 2;">
+                <div style="text-align: left; line-height: 1.8;">
                     <p><strong><i class="fas fa-hashtag"></i> ID:</strong> ${v.id}</p>
                     <p><strong><i class="fas fa-calendar"></i> Fecha:</strong> ${dateStr}</p>
                     <p><strong><i class="fas fa-clock"></i> Hora:</strong> ${timeStr}</p>
                     <p><strong><i class="fas fa-building"></i> Proyecto:</strong> ${v.projectName}</p>
                     <p><strong><i class="fas fa-user"></i> Prospecto:</strong> ${v.prospectName}</p>
-                    <p><strong><i class="fas fa-user-tie"></i> Agente:</strong> ${v.agentName}</p>
+                    <p><strong><i class="fas fa-users"></i> Personas (Prospecto y acompañantes):</strong> ${personas}</p>
+                    <p><strong><i class="fas fa-user-tie"></i> Asesor a cargo:</strong> ${v.agentName}</p>
+                    <p><strong><i class="fas fa-shuttle-van"></i> Ocupación de la Movilidad:</strong> ${cuposOcupados}/8 cupos (${cuposDisponibles} disponibles)</p>
                     <p><strong><i class="fas fa-info-circle"></i> Estado:</strong> ${estado}</p>
                 </div>
             `,
             confirmButtonText: 'Cerrar',
-            width: 500
+            width: 520
         });
     }
 
@@ -541,21 +552,54 @@ class Visitas {
         const hora = document.getElementById('visitaHora').value;
         const proyectoId = document.getElementById('visitaProyecto').value;
         const prospectoId = document.getElementById('visitaProspecto').value;
+        const personasInput = document.getElementById('visitaPersonas');
+        const personas = personasInput ? parseInt(personasInput.value, 10) : 1;
 
         if (!fecha || !hora || !proyectoId || !prospectoId) {
-            UI.showAlert('Complete todos los campos', 'warning');
+            Swal.fire({
+                icon: 'info',
+                title: 'Campos incompletos',
+                text: 'Por favor complete todos los campos requeridos para programar la visita.',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#2b72eb',
+                allowOutsideClick: true
+            });
+            return;
+        }
+
+        if (isNaN(personas) || personas < 1) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Cantidad inválida',
+                text: 'Debe ingresar al menos 1 persona (prospecto y acompañantes).',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#2b72eb',
+                allowOutsideClick: true
+            });
+            return;
+        }
+
+        if (personas > 7) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Capacidad de movilidad excedida',
+                text: 'La movilidad tiene capacidad máxima de 8 pasajeros (máximo 7 acompañantes más 1 asesor).',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#2b72eb',
+                allowOutsideClick: true
+            });
             return;
         }
 
         // Enviar fecha-hora SIN convertir a UTC para evitar desfase de zona horaria
-        // El servidor no usa hora boliviana, así que enviamos la hora tal cual
         const visitDate = `${fecha}T${hora}:00`;
 
         try {
             await this._safePost('/visitas', {
                 visitDate: visitDate,
                 projectId: parseInt(proyectoId),
-                prospectId: parseInt(prospectoId)
+                prospectId: parseInt(prospectoId),
+                attendeesCount: personas
             });
 
             UI.closeModal('modalVisita');
@@ -570,12 +614,23 @@ class Visitas {
             const user = this.app.auth.getUser();
             const agenteName = user.nombre + ' ' + user.apellido;
 
-            const mensaje = `Buen día, se informa que el día ${fecha} a las ${hora} queda agendado una visita a ${proyectoName} a cargo del agente ${agenteName}, para el prospecto ${prospectoName}`;
+            const personasTexto = personas === 1 ? '1 persona' : `${personas} personas`;
+            const mensaje = `Buen día, se informa que el día ${fecha} a las ${hora} queda agendada una visita a ${proyectoName} a cargo del agente ${agenteName}, para el prospecto ${prospectoName} (${personasTexto}).`;
             const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
             window.open(url, '_blank');
 
         } catch (error) {
-            UI.showAlert(error.message || 'Error al programar visita', 'error');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Aviso de Movilidad',
+                text: error.message || 'Error al programar la visita.',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#2b72eb',
+                allowOutsideClick: true,
+                customClass: {
+                    popup: 'swal-wide-popup'
+                }
+            });
         }
     }
 

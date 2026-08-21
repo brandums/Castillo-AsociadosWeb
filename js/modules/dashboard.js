@@ -1061,7 +1061,13 @@ class Dashboard {
             const badgeText = isCancelled ? 'Cancelada' : (isCompleted ? 'Completada' : 'Programada');
             const cardTypeClass = isCancelled ? 'event-cancelada' : 'event-visita';
 
-            const mensaje = `Buen día, consulta sobre la visita programada para ${v.projectName} a las ${timeStr} para el prospecto ${v.prospectName}.`;
+            const personas = v.attendeesCount || 1;
+            const cupos = v.occupiedSeatsOnTrip || (personas + 1);
+            const cuposBadge = v.status === 0 
+                ? `<span class="badge ${cupos >= 8 ? 'badge-danger' : 'badge-info'}" style="font-size: 0.75rem;"><i class="fas fa-shuttle-van"></i> ${cupos}/8 cupos</span>` 
+                : '';
+
+            const mensaje = `Buen día, consulta sobre la visita programada para ${v.projectName} a las ${timeStr} para el prospecto ${v.prospectName} (${personas} personas).`;
             const wsUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
 
             html += `
@@ -1071,13 +1077,17 @@ class Dashboard {
                             <i class="fas fa-car" style="color: ${isCancelled ? '#ef4444' : '#10b981'};"></i>
                             <span>Visita: ${v.projectName || 'Proyecto'}</span>
                         </div>
-                        <span class="agenda-event-time">
-                            <i class="fas fa-clock" style="font-size: 0.75rem;"></i> ${timeStr}
-                        </span>
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span class="agenda-event-time">
+                                <i class="fas fa-clock" style="font-size: 0.75rem;"></i> ${timeStr}
+                            </span>
+                            ${cuposBadge}
+                        </div>
                     </div>
                     <div class="agenda-event-details">
-                        <div><strong>Prospecto:</strong> ${v.prospectName || 'No especificado'}</div>
+                        <div><strong>Prospecto:</strong> ${v.prospectName || 'No especificado'} (${personas} ${personas === 1 ? 'persona' : 'personas'})</div>
                         <div><strong>Asesor:</strong> ${v.agentName || 'No especificado'}</div>
+                        ${v.status === 0 ? `<div><strong>Ocupación de salida:</strong> <span style="font-weight:600; color:${cupos >= 8 ? '#ef4444' : '#2b72eb'};">${cupos}/8 cupos</span> (${v.availableSeatsOnTrip !== undefined ? v.availableSeatsOnTrip : (8 - cupos)} disponibles)</div>` : ''}
                     </div>
                     <div class="agenda-event-actions">
                         <span class="badge badge-${badgeClass}">${badgeText}</span>
